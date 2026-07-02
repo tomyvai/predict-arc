@@ -42,7 +42,6 @@
 
     <script>
         const contractAddress = "0xa144672B1DFc3348F0D938DE6496C031a5bcCA3D";
-        
         const markets = [
             { id: 1, title: "Will Bitcoin hit $120,000 before the end of 2026?" },
             { id: 2, title: "Will Ethereum surpass $5,000 this year?" },
@@ -80,17 +79,17 @@
             try {
                 const provider = new ethers.providers.Web3Provider(window.ethereum);
                 const signer = provider.getSigner();
-                const contract = new ethers.Contract(contractAddress, ["function bet(uint256 _marketId, bool _prediction) external payable"], signer);
+                const contract = new ethers.Contract(contractAddress, ["function bet(uint256 _marketId, bool _prediction) external"], signer);
 
                 alert("Please confirm the transaction in MetaMask...");
                 
-                // Transaction execution
-                const tx = await contract.bet(id, isYes, { value: ethers.utils.parseEther("0.01") });
+                // USDC ট্রানজেকশনের জন্য value ছাড়াই কল করা হচ্ছে
+                const tx = await contract.bet(id, isYes);
                 
                 alert("Transaction submitted. Waiting for blockchain confirmation...");
-                await tx.wait(); // ট্রানজেকশন সফল হওয়া পর্যন্ত অপেক্ষা করবে
+                await tx.wait(); 
                 
-                alert("Success! Your bet has been confirmed.");
+                alert("Success! Your bet has been confirmed on the blockchain.");
             } catch (err) {
                 console.error(err);
                 alert("Transaction failed: " + (err.message || "User denied"));
