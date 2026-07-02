@@ -3,36 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prediction Market</title>
-    <!-- Tailwind CSS for Styling -->
+    <title>Prediction Arc | Modern Prediction Market</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Ethers.js -->
     <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"></script>
+    <style>
+        .glass-card { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .gradient-text { background: linear-gradient(to right, #60a5fa, #a855f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    </style>
 </head>
-<body class="bg-gray-900 text-white min-h-screen flex items-center justify-center p-4">
+<body class="bg-slate-950 text-white min-h-screen font-sans">
 
-    <div class="max-w-md w-full bg-gray-800 rounded-2xl shadow-2xl p-8 border border-gray-700">
-        <h1 class="text-3xl font-bold text-center mb-6 text-blue-400">Prediction Market</h1>
-        
-        <div class="mb-6">
-            <label class="block text-sm font-medium mb-2 text-gray-400">Enter Market ID</label>
-            <input type="number" id="marketId" placeholder="e.g., 0" 
-                class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 focus:outline-none focus:border-blue-500 text-white">
+    <header class="p-8 text-center">
+        <h1 class="text-5xl font-extrabold gradient-text">Prediction Arc</h1>
+        <p class="text-slate-400 mt-2 text-lg">Decentralized Prediction Market</p>
+    </header>
+
+    <main class="max-w-xl mx-auto p-4">
+        <!-- Betting Card -->
+        <div class="glass-card rounded-3xl p-8 shadow-2xl mb-8">
+            <div class="mb-6">
+                <label class="block text-sm font-semibold text-slate-300 mb-2">Market ID</label>
+                <input type="number" id="marketId" placeholder="e.g., 0" 
+                    class="w-full p-4 rounded-xl bg-slate-900 border border-slate-700 focus:ring-2 focus:ring-blue-500 outline-none transition">
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <button onclick="placeBet(true)" 
+                    class="bg-emerald-600 hover:bg-emerald-500 py-4 rounded-xl font-bold transition transform active:scale-95 shadow-lg shadow-emerald-900/20">
+                    YES
+                </button>
+                <button onclick="placeBet(false)" 
+                    class="bg-rose-600 hover:bg-rose-500 py-4 rounded-xl font-bold transition transform active:scale-95 shadow-lg shadow-rose-900/20">
+                    NO
+                </button>
+            </div>
+            <p id="status" class="mt-6 text-center text-sm text-blue-300 font-medium"></p>
         </div>
 
-        <div class="flex gap-4">
-            <button onclick="placeBet(true)" 
-                class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition duration-200">
-                Bet YES
-            </button>
-            <button onclick="placeBet(false)" 
-                class="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-lg transition duration-200">
-                Bet NO
-            </button>
+        <!-- Market List -->
+        <div id="marketContainer" class="space-y-4">
+            <h2 class="text-xl font-bold text-slate-300 mb-4">Active Markets</h2>
         </div>
-
-        <p id="status" class="mt-6 text-center text-sm text-gray-400"></p>
-    </div>
+    </main>
 
     <script>
         const contractAddress = "0xa144672B1DFc3348F0D938DE6496C031a5bcCA3D";
@@ -40,29 +52,47 @@
 
         async function placeBet(isYes) {
             const statusEl = document.getElementById('status');
-            if (window.ethereum) {
-                try {
-                    const provider = new ethers.providers.Web3Provider(window.ethereum);
-                    await provider.send("eth_requestAccounts", []);
-                    const signer = provider.getSigner();
-                    const contract = new ethers.Contract(contractAddress, abi, signer);
-                    const mId = document.getElementById('marketId').value;
-                    
-                    if(!mId) { alert("Please enter a Market ID"); return; }
-
-                    statusEl.innerText = "Processing transaction...";
-                    const tx = await contract.bet(mId, isYes, { value: ethers.utils.parseEther("0.01") });
-                    
-                    statusEl.innerText = "Transaction sent! Waiting for confirmation...";
-                    await tx.wait();
-                    statusEl.innerText = "Success! Your bet has been placed.";
-                } catch (error) {
-                    statusEl.innerText = "Error: " + error.message;
-                }
-            } else {
-                alert("Please install MetaMask!");
+            try {
+                if (!window.ethereum) return alert("Please install MetaMask!");
+                const provider = new ethers.providers.Web3Provider(window.ethereum);
+                await provider.send("eth_requestAccounts", []);
+                const signer = provider.getSigner();
+                const contract = new ethers.Contract(contractAddress, abi, signer);
+                const mId = document.getElementById('marketId').value;
+                
+                statusEl.innerText = "Confirm transaction in MetaMask...";
+                const tx = await contract.bet(mId, isYes, { value: ethers.utils.parseEther("0.01") });
+                statusEl.innerText = "Betting... Please wait.";
+                await tx.wait();
+                statusEl.innerText = "Success! Your bet has been placed.";
+            } catch (error) {
+                statusEl.innerText = "Error: " + error.message;
             }
         }
+
+        async function loadMarkets() {
+            const container = document.getElementById('marketContainer');
+            const provider = ethers.getDefaultProvider("homestead");
+            const contract = new ethers.Contract(contractAddress, abi, provider);
+            
+            for (let i = 0; i < 3; i++) {
+                try {
+                    const market = await contract.markets(i);
+                    const div = document.createElement('div');
+                    div.className = "glass-card p-5 rounded-xl border border-slate-700 flex justify-between items-center";
+                    div.innerHTML = `
+                        <div>
+                            <p class="font-bold text-white">ID #${i}: ${market.question || "Loading..."}</p>
+                            <p class="text-xs text-slate-400">Yes: ${market.totalYes.toString()} | No: ${market.totalNo.toString()}</p>
+                        </div>
+                        <button onclick="document.getElementById('marketId').value = ${i}" 
+                            class="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-lg text-sm transition">Select</button>
+                    `;
+                    container.appendChild(div);
+                } catch (e) { break; }
+            }
+        }
+        window.onload = loadMarkets;
     </script>
 </body>
 </html>
