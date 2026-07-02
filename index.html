@@ -39,8 +39,8 @@
         </div>
     </main>
 
-    <!-- ethers.js লাইব্রেরিটি একদম নিচে লোড করা হলো -->
-    <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"></script>
+    <!-- ethers.js এর স্টেবল ভার্সন লোড করা হচ্ছে -->
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
     <script>
         const contractAddress = "0xa144672B1DFc3348F0D938DE6496C031a5bcCA3D";
@@ -74,8 +74,11 @@
         function selectMarket(id) { document.getElementById('marketId').value = id; }
         
         async function placeBet(isYes) {
-            if (typeof ethers === 'undefined') return alert("Ethers.js is still loading, please wait...");
-            
+            // চেক করা হচ্ছে ethers লাইব্রেরি লোড হয়েছে কি না
+            if (typeof ethers === 'undefined') {
+                return alert("Ethers.js is still loading! Please refresh the page.");
+            }
+
             const id = document.getElementById('marketId').value;
             if (!id) return alert("Please select a market first!");
             if (!window.ethereum) return alert("Please connect wallet first!");
@@ -85,9 +88,10 @@
                 const signer = provider.getSigner();
                 const contract = new ethers.Contract(contractAddress, ["function bet(uint256 _marketId, bool _prediction) external"], signer);
 
-                alert("Please confirm in MetaMask...");
+                alert("Please confirm the transaction in MetaMask...");
                 const tx = await contract.bet(id, isYes);
-                alert("Transaction sent! Waiting for confirmation...");
+                alert("Transaction sent! Waiting for blockchain confirmation...");
+                
                 await tx.wait(); 
                 alert("Success! Your bet is confirmed.");
             } catch (err) {
