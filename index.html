@@ -6,27 +6,23 @@
     <title>Predict.arc | Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background: radial-gradient(circle at top right, #1e293b, #0f172a); color: #f8fafc; font-family: 'Inter', sans-serif; min-height: 100vh; }
-        .glass-panel { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); }
+        body { background: radial-gradient(circle at top right, #1e293b, #0f172a); color: #f8fafc; min-height: 100vh; }
+        .glass-panel { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.08); }
     </style>
 </head>
 <body class="p-8">
     <header class="flex justify-between items-center mb-10 max-w-6xl mx-auto">
-        <h1 class="text-3xl font-bold text-white tracking-tighter">Predict.arc</h1>
-        <button id="connectWallet" onclick="connectWallet()" class="bg-indigo-600 px-6 py-2 rounded-full font-medium">Connect Wallet</button>
+        <h1 class="text-3xl font-bold">Predict.arc</h1>
+        <button id="connectWallet" onclick="connectWallet()" class="bg-indigo-600 px-6 py-2 rounded-full">Connect Wallet</button>
     </header>
 
     <main class="max-w-6xl mx-auto space-y-8">
-        <!-- Market List -->
         <div>
             <h2 class="text-2xl font-semibold mb-6">Active Markets</h2>
-            <div id="marketContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <!-- মার্কেটগুলো এখানে লোড হবে -->
-            </div>
+            <div id="marketContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"></div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <!-- Place Bet -->
             <div class="glass-panel p-6 rounded-3xl">
                 <h2 class="font-bold text-xl mb-6">Place Bet</h2>
                 <input id="marketId" type="number" placeholder="Market ID" class="w-full p-4 bg-slate-950 rounded-2xl mb-4 border border-slate-700">
@@ -36,7 +32,6 @@
                 </div>
             </div>
 
-            <!-- Create Market -->
             <div class="glass-panel p-6 rounded-3xl">
                 <h2 class="font-bold text-xl mb-6">Create New Market</h2>
                 <input id="newQuestion" type="text" placeholder="Enter question..." class="w-full p-4 bg-slate-950 rounded-2xl mb-4 border border-slate-700">
@@ -66,32 +61,33 @@
             const contract = new ethers.Contract(contractAddress, abi, provider);
             const container = document.getElementById('marketContainer');
             container.innerHTML = "";
-
             try {
                 const count = await contract.marketsCount();
                 for (let i = 0; i < count; i++) {
                     const m = await contract.markets(i);
-                    container.innerHTML += `
-                        <div class="glass-panel p-4 rounded-2xl border border-slate-700">
-                            <p class="font-bold text-sm mb-1">ID: ${i}</p>
-                            <p class="text-sm mb-3">${m.question}</p>
-                            <p class="text-xs text-slate-400">Yes: ${m.totalYes} | No: ${m.totalNo}</p>
-                        </div>`;
+                    container.innerHTML += `<div class="glass-panel p-4 rounded-2xl border border-slate-700">
+                        <p class="font-bold">ID: ${i}</p><p class="text-sm">${m.question}</p>
+                        <p class="text-xs text-slate-400">Yes: ${m.totalYes} | No: ${m.totalNo}</p></div>`;
                 }
-            } catch (err) { console.error("Error loading:", err); }
+            } catch (err) { console.error(err); }
         }
 
         async function placeBet(isYes) {
             const id = document.getElementById('marketId').value;
+            if (!id) return alert("Enter Market ID");
             const provider = new ethers.providers.Web3Provider(window.ethereum);
             const signer = provider.getSigner();
             const contract = new ethers.Contract(contractAddress, abi, signer);
             try {
-                const tx = await contract.bet(parseInt(id), Boolean(isYes), { value: ethers.utils.parseEther("0.001"), gasLimit: 300000 });
+                // এখানে Boolean(isYes) ব্যবহার করা হয়েছে যাতে ডেটা টাইপ ঠিক থাকে
+                const tx = await contract.bet(parseInt(id), Boolean(isYes), { 
+                    value: ethers.utils.parseEther("0.001"), 
+                    gasLimit: 300000 
+                });
                 await tx.wait();
                 alert("Bet confirmed!");
                 loadMarkets();
-            } catch (err) { alert("Error: " + err.message); }
+            } catch (err) { alert("Error: " + (err.data?.message || err.message)); }
         }
 
         async function createMarket() {
