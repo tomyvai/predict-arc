@@ -15,7 +15,127 @@
 
     <script>
         const contractAddress = "0xa144672B1DFc3348F0D938DE6496C031a5bcCA3D"; 
-        const abi = [
+        const abi = [[
+	{
+		"inputs": [],
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_marketId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "bool",
+				"name": "_prediction",
+				"type": "bool"
+			}
+		],
+		"name": "bet",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_marketId",
+				"type": "uint256"
+			}
+		],
+		"name": "claimWinnings",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_question",
+				"type": "string"
+			}
+		],
+		"name": "createMarket",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "markets",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "question",
+				"type": "string"
+			},
+			{
+				"internalType": "bool",
+				"name": "resolved",
+				"type": "bool"
+			},
+			{
+				"internalType": "bool",
+				"name": "outcome",
+				"type": "bool"
+			},
+			{
+				"internalType": "uint256",
+				"name": "totalYes",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "totalNo",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "owner",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_marketId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "bool",
+				"name": "_outcome",
+				"type": "bool"
+			}
+		],
+		"name": "resolveMarket",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	}
+]
             "function bet(uint256 _marketId, bool _prediction) public payable"
         ];
 
