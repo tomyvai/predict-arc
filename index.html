@@ -77,19 +77,24 @@
             if (!window.ethereum) return alert("Please connect wallet first!");
 
             try {
+                // ethers লাইব্রেরি সঠিকভাবে লোড হয়েছে কি না নিশ্চিত করা
+                if (typeof ethers === 'undefined') throw new Error("Ethers.js not loaded!");
+
                 const provider = new ethers.providers.Web3Provider(window.ethereum);
                 const signer = provider.getSigner();
                 const contract = new ethers.Contract(contractAddress, ["function bet(uint256 _marketId, bool _prediction) external"], signer);
 
                 alert("Please confirm the transaction in MetaMask...");
                 
-                // USDC ট্রানজেকশনের জন্য value ছাড়াই কল করা হচ্ছে
+                // USDC ট্রানজেকশন (এখানে value প্রয়োজন নেই)
                 const tx = await contract.bet(id, isYes);
                 
                 alert("Transaction submitted. Waiting for blockchain confirmation...");
+                
+                // কনফার্মেশনের জন্য অপেক্ষা করা
                 await tx.wait(); 
                 
-                alert("Success! Your bet has been confirmed on the blockchain.");
+                alert("Success! Your bet has been confirmed.");
             } catch (err) {
                 console.error(err);
                 alert("Transaction failed: " + (err.message || "User denied"));
