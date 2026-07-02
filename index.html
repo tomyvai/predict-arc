@@ -3,22 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Predict.ly | Dashboard</title>
+    <title>Predict.arc | Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"></script>
     <style>
-        body { 
-            background: radial-gradient(circle at top right, #1e293b, #0f172a);
-            color: #f8fafc; 
-            font-family: 'Inter', sans-serif; 
-            min-height: 100vh;
-        }
-        .glass-panel { 
-            background: rgba(255, 255, 255, 0.03); 
-            backdrop-filter: blur(20px); 
-            border: 1px solid rgba(255, 255, 255, 0.08); 
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-        }
+        body { background: radial-gradient(circle at top right, #1e293b, #0f172a); color: #f8fafc; font-family: 'Inter', sans-serif; min-height: 100vh; }
+        .glass-panel { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); }
         button { transition: all 0.3s ease !important; }
         button:hover { transform: translateY(-2px); }
     </style>
@@ -26,67 +16,74 @@
 <body class="p-8">
 
     <header class="flex justify-between items-center mb-10 max-w-6xl mx-auto">
-        <h1 class="text-3xl font-bold text-white tracking-tighter">Predict.ly</h1>
+        <h1 class="text-3xl font-bold text-white tracking-tighter">Predict.arc</h1>
         <button class="bg-indigo-600 hover:bg-indigo-700 px-6 py-2 rounded-full font-medium">Connect Wallet</button>
     </header>
 
-    <main class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div class="lg:col-span-2">
-            <h2 class="text-2xl font-semibold mb-6">Featured Predictions</h2>
-            <div id="marketContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <!-- Market cards will load here -->
+    <main class="max-w-6xl mx-auto space-y-8">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="lg:col-span-2">
+                <h2 class="text-2xl font-semibold mb-6">Featured Predictions</h2>
+                <div id="marketContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+            </div>
+
+            <div class="lg:col-span-1">
+                <div class="glass-panel p-6 rounded-3xl border border-slate-700">
+                    <h2 class="font-bold text-xl mb-6">Place Bet</h2>
+                    <input id="marketId" type="number" placeholder="Market ID" class="w-full p-4 bg-slate-950 rounded-2xl mb-4 border border-slate-700 focus:outline-none focus:border-indigo-500">
+                    <div class="grid grid-cols-2 gap-3">
+                        <button onclick="placeBet(true)" class="bg-emerald-600 hover:bg-emerald-500 py-4 rounded-2xl font-bold">YES</button>
+                        <button onclick="placeBet(false)" class="bg-rose-600 hover:bg-rose-500 py-4 rounded-2xl font-bold">NO</button>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="lg:col-span-1">
-            <div class="glass-panel p-6 rounded-3xl border border-slate-700">
-                <h2 class="font-bold text-xl mb-6">Place Bet</h2>
-                <input id="marketId" type="number" placeholder="Market ID" 
-                    class="w-full p-4 bg-slate-950 rounded-2xl mb-4 border border-slate-700 focus:outline-none focus:border-indigo-500 transition">
-                <div class="grid grid-cols-2 gap-3">
-                    <button onclick="placeBet(true)" class="bg-emerald-600 hover:bg-emerald-500 py-4 rounded-2xl font-bold">YES</button>
-                    <button onclick="placeBet(false)" class="bg-rose-600 hover:bg-rose-500 py-4 rounded-2xl font-bold">NO</button>
-                </div>
+        <!-- Market History -->
+        <div class="glass-panel p-8 rounded-3xl border border-slate-700">
+            <h2 class="text-2xl font-semibold mb-6">Market History</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead><tr class="text-slate-400 border-b border-slate-700"><th class="pb-4">Market</th><th class="pb-4">Action</th><th class="pb-4">Status</th></tr></thead>
+                    <tbody id="historyBody"></tbody>
+                </table>
             </div>
         </div>
     </main>
 
     <script>
         const contractAddress = "0xa144672B1DFc3348F0D938DE6496C031a5bcCA3D";
-        const contractABI = [{"inputs":[],"stateMutability":"nonpayable","type":"constructor"},{"inputs":[{"internalType":"uint256","name":"_marketId","type":"uint256"},{"internalType":"bool","name":"_prediction","type":"bool"}],"name":"bet","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[{"internalType":"uint256","name":"_marketId","type":"uint256"}],"name":"claimWinnings","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"string","name":"_question","type":"string"}],"name":"createMarket","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"markets","outputs":[{"internalType":"string","name":"question","type":"string"},{"internalType":"bool","name":"resolved","type":"bool"},{"internalType":"bool","name":"outcome","type":"bool"},{"internalType":"uint256","name":"totalYes","type":"uint256"},{"internalType":"uint256","name":"totalNo","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"_marketId","type":"uint256"},{"internalType":"bool","name":"_outcome","type":"bool"}],"name":"resolveMarket","outputs":[],"stateMutability":"nonpayable","type":"function"}];
+        const contractABI = [{"inputs":[],"stateMutability":"nonpayable","type":"constructor"},{"inputs":[{"internalType":"uint256","name":"_marketId","type":"uint256"},{"internalType":"bool","name":"_prediction","type":"bool"}],"name":"bet","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"markets","outputs":[{"internalType":"string","name":"question","type":"string"},{"internalType":"bool","name":"resolved","type":"bool"},{"internalType":"bool","name":"outcome","type":"bool"},{"internalType":"uint256","name":"totalYes","type":"uint256"},{"internalType":"uint256","name":"totalNo","type":"uint256"}],"stateMutability":"view","type":"function"}];
 
         const markets = [
             { id: 1, title: "Will 'RED FORCE TV' surpass 1M views in 2024?" },
-            { id: 2, title: "Which team wins the 'FIFA World Cup 2026'?" },
-            { id: 3, title: "Global AI adoption rate by Q4 2025?" },
-            { id: 4, title: "Next major crypto to hit $100K ATH?" }
+            { id: 2, title: "Which team wins the 'FIFA World Cup 2026'?" }
         ];
 
         function loadMarkets() {
             const container = document.getElementById('marketContainer');
             container.innerHTML = markets.map(m => `
-                <div class="glass-panel p-6 rounded-3xl border border-slate-700 hover:border-indigo-500 transition duration-300">
+                <div class="glass-panel p-6 rounded-3xl border border-slate-700">
                     <h3 class="font-bold text-lg mb-6">${m.title}</h3>
-                    <button onclick="selectMarket(${m.id})" class="bg-slate-800 hover:bg-slate-700 w-full py-3 rounded-xl font-semibold text-sm">Select Market</button>
+                    <button onclick="selectMarket(${m.id})" class="bg-indigo-500 hover:bg-indigo-400 w-full py-3 rounded-xl font-semibold text-sm">Select Market</button>
                 </div>
             `).join('');
+            
+            document.getElementById('historyBody').innerHTML = `
+                <tr class="border-b border-slate-800">
+                    <td class="py-4">FIFA World Cup 2026</td>
+                    <td class="py-4 text-emerald-400">Bet YES</td>
+                    <td class="py-4 text-slate-400">Pending</td>
+                </tr>
+            `;
         }
 
         function selectMarket(id) { document.getElementById('marketId').value = id; }
-
+        
         async function placeBet(isYes) {
             const id = document.getElementById('marketId').value;
-            if (!id) return alert("Please select a market first!");
-            try {
-                const provider = new ethers.providers.Web3Provider(window.ethereum);
-                await provider.send("eth_requestAccounts", []);
-                const signer = provider.getSigner();
-                const contract = new ethers.Contract(contractAddress, contractABI, signer);
-                const tx = await contract.bet(id, isYes, { value: ethers.utils.parseEther("0.01") });
-                alert("Transaction submitted!");
-                await tx.wait();
-                alert("Bet confirmed!");
-            } catch (err) { alert("Error: " + err.message); }
+            if (!id) return alert("Select a market!");
+            alert("Betting on ID: " + id + " (Option: " + (isYes ? "YES" : "NO") + ")");
         }
 
         window.onload = loadMarkets;
