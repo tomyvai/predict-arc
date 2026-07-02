@@ -8,43 +8,44 @@
     <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"></script>
     <style>
         body { 
-            background-color: #0f172a; 
+            background: radial-gradient(circle at top right, #1e293b, #0f172a);
             color: #f8fafc; 
             font-family: 'Inter', sans-serif; 
+            min-height: 100vh;
         }
         .glass-panel { 
-            background: rgba(30, 41, 59, 0.5); 
-            backdrop-filter: blur(12px); 
-            border: 1px solid rgba(255, 255, 255, 0.1); 
+            background: rgba(255, 255, 255, 0.03); 
+            backdrop-filter: blur(20px); 
+            border: 1px solid rgba(255, 255, 255, 0.08); 
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         }
+        button { transition: all 0.3s ease !important; }
+        button:hover { transform: translateY(-2px); }
     </style>
 </head>
 <body class="p-8">
 
     <header class="flex justify-between items-center mb-10 max-w-6xl mx-auto">
         <h1 class="text-3xl font-bold text-white tracking-tighter">Predict.ly</h1>
-        <button class="bg-indigo-600 hover:bg-indigo-700 px-6 py-2 rounded-full font-medium transition duration-200">Connect Wallet</button>
+        <button class="bg-indigo-600 hover:bg-indigo-700 px-6 py-2 rounded-full font-medium">Connect Wallet</button>
     </header>
 
     <main class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
         <div class="lg:col-span-2">
             <h2 class="text-2xl font-semibold mb-6">Featured Predictions</h2>
             <div id="marketContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <!-- Market cards -->
+                <!-- Market cards will load here -->
             </div>
         </div>
 
         <div class="lg:col-span-1">
             <div class="glass-panel p-6 rounded-3xl border border-slate-700">
                 <h2 class="font-bold text-xl mb-6">Place Bet</h2>
-                
                 <input id="marketId" type="number" placeholder="Market ID" 
                     class="w-full p-4 bg-slate-950 rounded-2xl mb-4 border border-slate-700 focus:outline-none focus:border-indigo-500 transition">
-                
                 <div class="grid grid-cols-2 gap-3">
-                    <button onclick="placeBet(true)" class="bg-emerald-600 hover:bg-emerald-500 py-4 rounded-2xl font-bold transition">YES</button>
-                    <button onclick="placeBet(false)" class="bg-rose-600 hover:bg-rose-500 py-4 rounded-2xl font-bold transition">NO</button>
+                    <button onclick="placeBet(true)" class="bg-emerald-600 hover:bg-emerald-500 py-4 rounded-2xl font-bold">YES</button>
+                    <button onclick="placeBet(false)" class="bg-rose-600 hover:bg-rose-500 py-4 rounded-2xl font-bold">NO</button>
                 </div>
             </div>
         </div>
@@ -66,14 +67,12 @@
             container.innerHTML = markets.map(m => `
                 <div class="glass-panel p-6 rounded-3xl border border-slate-700 hover:border-indigo-500 transition duration-300">
                     <h3 class="font-bold text-lg mb-6">${m.title}</h3>
-                    <button onclick="selectMarket(${m.id})" class="bg-slate-800 hover:bg-slate-700 w-full py-3 rounded-xl font-semibold text-sm transition">Select Market</button>
+                    <button onclick="selectMarket(${m.id})" class="bg-slate-800 hover:bg-slate-700 w-full py-3 rounded-xl font-semibold text-sm">Select Market</button>
                 </div>
             `).join('');
         }
 
-        function selectMarket(id) {
-            document.getElementById('marketId').value = id;
-        }
+        function selectMarket(id) { document.getElementById('marketId').value = id; }
 
         async function placeBet(isYes) {
             const id = document.getElementById('marketId').value;
@@ -87,9 +86,7 @@
                 alert("Transaction submitted!");
                 await tx.wait();
                 alert("Bet confirmed!");
-            } catch (err) {
-                alert("Error: " + err.message);
-            }
+            } catch (err) { alert("Error: " + err.message); }
         }
 
         window.onload = loadMarkets;
