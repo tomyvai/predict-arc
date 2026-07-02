@@ -4,12 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Predict.ly | Dashboard</title>
+    <!-- Tailwind CSS for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Ethers.js for Blockchain Interaction -->
+    <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js" type="application/javascript"></script>
     <style>
         body { background-color: #0f172a; color: white; }
         .glass-panel { 
             background: rgba(30, 41, 59, 0.5); 
-            backdrop-filter: blur(10px); 
+            backdrop-filter: blur(12px); 
             border: 1px solid rgba(255, 255, 255, 0.1); 
         }
     </style>
@@ -19,7 +22,7 @@
     <!-- Header -->
     <header class="flex justify-between items-center mb-10">
         <h1 class="text-3xl font-bold text-white tracking-tight">Predict.ly</h1>
-        <button class="bg-indigo-600 hover:bg-indigo-700 px-6 py-2 rounded-full font-medium transition">Connect Wallet</button>
+        <button id="connectWallet" class="bg-indigo-600 hover:bg-indigo-700 px-6 py-2 rounded-full font-medium transition">Connect Wallet</button>
     </header>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -27,7 +30,7 @@
         <div class="lg:col-span-2">
             <h2 class="text-2xl font-semibold mb-6">Featured Predictions</h2>
             <div id="marketContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <!-- Markets will be injected here -->
+                <!-- Market cards will load here -->
             </div>
         </div>
 
@@ -45,6 +48,19 @@
     </div>
 
     <script>
+        const contractAddress = "0xa144672B1DFc3348F0D938DE6496C031a5bcCA3D";
+        
+    
+        const contractABI = [
+            {"inputs":[],"stateMutability":"nonpayable","type":"constructor"},
+            {"inputs":[{"internalType":"uint256","name":"_marketId","type":"uint256"},{"internalType":"bool","name":"_prediction","type":"bool"}],"name":"bet","outputs":[],"stateMutability":"payable","type":"function"},
+            {"inputs":[{"internalType":"uint256","name":"_marketId","type":"uint256"}],"name":"claimWinnings","outputs":[],"stateMutability":"nonpayable","type":"function"},
+            {"inputs":[{"internalType":"string","name":"_question","type":"string"}],"name":"createMarket","outputs":[],"stateMutability":"nonpayable","type":"function"},
+            {"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"markets","outputs":[{"internalType":"string","name":"question","type":"string"},{"internalType":"bool","name":"resolved","type":"bool"},{"internalType":"bool","name":"outcome","type":"bool"},{"internalType":"uint256","name":"totalYes","type":"uint256"},{"internalType":"uint256","name":"totalNo","type":"uint256"}],"stateMutability":"view","type":"function"},
+            {"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},
+            {"inputs":[{"internalType":"uint256","name":"_marketId","type":"uint256"},{"internalType":"bool","name":"_outcome","type":"bool"}],"name":"resolveMarket","outputs":[],"stateMutability":"nonpayable","type":"function"}
+        ];
+
         const markets = [
             { id: 1, title: "Will 'RED FORCE TV' surpass 1M views in 2024?" },
             { id: 2, title: "Which team wins the 'FIFA World Cup 2026'?" },
@@ -57,9 +73,7 @@
             container.innerHTML = markets.map(m => `
                 <div class="glass-panel p-6 rounded-3xl border border-slate-700 hover:border-indigo-500 transition">
                     <h3 class="font-bold text-lg mb-4">${m.title}</h3>
-                    <button onclick="selectMarket(${m.id})" class="bg-slate-800 hover:bg-slate-700 w-full py-2.5 rounded-xl font-semibold text-sm transition">
-                        Select Market
-                    </button>
+                    <button onclick="selectMarket(${m.id})" class="bg-slate-800 hover:bg-slate-700 w-full py-2.5 rounded-xl font-semibold text-sm transition">Select Market</button>
                 </div>
             `).join('');
         }
@@ -68,10 +82,32 @@
             document.getElementById('marketId').value = id;
         }
 
-        function placeBet(isYes) {
+        async function placeBet(isYes) {
             const id = document.getElementById('marketId').value;
-            if(!id) return alert("Select a market first!");
-            alert("Placing " + (isYes ? "YES" : "NO") + " bet on Market #" + id);
+            if (!id) return alert("Please select a market first!");
+
+            if (typeof window.ethereum !== 'undefined') {
+                try {
+                    const provider = new ethers.providers.Web3Provider(window.ethereum);
+                    await provider.send("eth_requestAccounts", []);
+                    const signer = provider.getSigner();
+                    const contract = new ethers.Contract(contractAddress, contractABI, signer);
+
+                    // বেট প্লেস করা (০.০১ ETH ডিফল্ট)
+                    const tx = await contract.bet(id, isYes, {
+                        value: ethers.utils.parseEther("0.01")
+                    });
+                    
+                    alert("Transaction sent! Wait for confirmation...");
+                    await tx.wait();
+                    alert("Bet successfully placed!");
+                } catch (error) {
+                    console.error(error);
+                    alert("Transaction failed!");
+                }
+            } else {
+                alert("Please install MetaMask to place a bet.");
+            }
         }
 
         window.onload = loadMarkets;
