@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Prediction Market</title>
+    <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"></script>
+</head>
+<body>
+    <h1>Prediction Market DApp</h1>
+    <input type="number" id="marketId" placeholder="Market ID (e.g., 0)">
+    <br><br>
+    
+    <button onclick="placeBet(true)">Bet YES</button>
+    <button onclick="placeBet(false)">Bet NO</button>
+
+    <script>
+        const contractAddress = "0xa144672B1DFc3348F0D938DE6496C031a5bcCA3D"; 
+        const abi = [
+            "function bet(uint256 _marketId, bool _prediction) public payable"
+        ];
+
+        async function placeBet(isYes) {
+            if (window.ethereum) {
+                const provider = new ethers.providers.Web3Provider(window.ethereum);
+                await provider.send("eth_requestAccounts", []);
+                const signer = provider.getSigner();
+                const contract = new ethers.Contract(contractAddress, abi, signer);
+
+                const mId = document.getElementById('marketId').value;
+
+                try {
+                    const tx = await contract.bet(mId, isYes, { value: ethers.utils.parseEther("0.01") });
+                    alert("Transaction sent! Please wait...");
+                    await tx.wait();
+                    alert("Success! Your bet has been placed.");
+                } catch (error) {
+                    alert("Error: " + error.message);
+                }
+            } else {
+                alert("Please install MetaMask!");
+            }
+        }
+    </script>
+</body>
+</html>
