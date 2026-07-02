@@ -84,20 +84,22 @@
 
                 alert("Please confirm the transaction in MetaMask...");
                 
-                // Native coin (ETH/BNB/MATIC) transfer
+                // Transaction execution
                 const tx = await contract.bet(id, isYes, { value: ethers.utils.parseEther("0.01") });
                 
-                alert("Transaction submitted. Waiting for confirmation...");
-                await tx.wait(); 
+                alert("Transaction submitted. Waiting for blockchain confirmation...");
+                await tx.wait(); // ট্রানজেকশন সফল হওয়া পর্যন্ত অপেক্ষা করবে
                 
-                alert("Success! Your bet is confirmed.");
+                alert("Success! Your bet has been confirmed.");
             } catch (err) {
                 console.error(err);
-                alert("Transaction failed: " + (err.message || "Denied"));
+                alert("Transaction failed: " + (err.message || "User denied"));
             }
         }
 
         window.onload = loadMarkets;
     </script>
+</body>
+</html>
 </body>
 </html>
