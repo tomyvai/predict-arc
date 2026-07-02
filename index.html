@@ -22,40 +22,24 @@
         <div class="lg:col-span-2">
             <h2 class="text-xl font-bold mb-6">Active Markets</h2>
             <div id="marketList" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <!-- 4 Market Cards -->
-                <div class="glass-card p-6 rounded-2xl border border-slate-700">
-                    <h3 class="font-bold mb-4">ID #1: Will BTC hit $100k?</h3>
-                    <button class="w-full bg-slate-800 py-2 rounded-lg hover:bg-slate-700">Select</button>
-                </div>
-                <div class="glass-card p-6 rounded-2xl border border-slate-700">
-                    <h3 class="font-bold mb-4">ID #2: Is AI the future?</h3>
-                    <button class="w-full bg-slate-800 py-2 rounded-lg hover:bg-slate-700">Select</button>
-                </div>
-                <div class="glass-card p-6 rounded-2xl border border-slate-700">
-                    <h3 class="font-bold mb-4">ID #3: Gold prices up?</h3>
-                    <button class="w-full bg-slate-800 py-2 rounded-lg hover:bg-slate-700">Select</button>
-                </div>
-                <div class="glass-card p-6 rounded-2xl border border-slate-700">
-                    <h3 class="font-bold mb-4">ID #4: New Ethereum ATH?</h3>
-                    <button class="w-full bg-slate-800 py-2 rounded-lg hover:bg-slate-700">Select</button>
-                </div>
+                <!-- Market cards will load here -->
             </div>
         </div>
 
-        <!-- Sidebar (Right: Bet & History) -->
+        <!-- Sidebar (Right) -->
         <div class="space-y-6">
             <div class="glass-card p-6 rounded-2xl">
                 <h2 class="font-bold mb-4">Place Bet</h2>
-                <input type="number" placeholder="Market ID" class="w-full p-3 bg-slate-900 rounded-lg mb-4 border border-slate-700">
+                <input id="marketId" type="number" placeholder="Market ID" class="w-full p-3 bg-slate-900 rounded-lg mb-4 border border-slate-700">
                 <div class="grid grid-cols-2 gap-2">
-                    <button class="bg-emerald-600 py-2 rounded-lg">YES</button>
-                    <button class="bg-rose-600 py-2 rounded-lg">NO</button>
+                    <button onclick="placeBet(true)" class="bg-emerald-600 py-2 rounded-lg hover:bg-emerald-700 transition">YES</button>
+                    <button onclick="placeBet(false)" class="bg-rose-600 py-2 rounded-lg hover:bg-rose-700 transition">NO</button>
                 </div>
             </div>
 
             <div class="glass-card p-6 rounded-2xl">
                 <h2 class="font-bold mb-4">Transaction History</h2>
-                <div class="text-sm text-slate-400 space-y-2">
+                <div id="history" class="text-sm text-slate-400 space-y-2">
                     <p>No recent activity.</p>
                 </div>
             </div>
@@ -63,7 +47,36 @@
     </div>
 
     <script>
+        const markets = [
+            { id: 1, title: "Will BTC hit $100k?" },
+            { id: 2, title: "Is AI the future?" },
+            { id: 3, title: "Gold prices up?" },
+            { id: 4, title: "New Ethereum ATH?" }
+        ];
+
+        function loadMarkets() {
+            const list = document.getElementById('marketList');
+            list.innerHTML = markets.map(m => `
+                <div class="glass-card p-6 rounded-2xl border border-slate-700">
+                    <h3 class="font-bold mb-4">ID #${m.id}: ${m.title}</h3>
+                    <button onclick="selectMarket(${m.id})" class="w-full bg-slate-800 py-2 rounded-lg hover:bg-slate-700 transition">Select</button>
+                </div>
+            `).join('');
+        }
+
+        function selectMarket(id) {
+            document.getElementById('marketId').value = id;
+        }
+
+        function placeBet(isYes) {
+            const id = document.getElementById('marketId').value;
+            if (!id) return alert("Please select a market first!");
+            alert("Bet placed on ID " + id + ": " + (isYes ? 'YES' : 'NO'));
+        }
+
         document.getElementById('walletBtn').onclick = () => alert("Connecting Wallet...");
+        
+        window.onload = loadMarkets;
     </script>
 </body>
 </html>
