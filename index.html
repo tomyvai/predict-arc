@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Predict.arc | Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"></script>
     <style>
         body { background: radial-gradient(circle at top right, #1e293b, #0f172a); color: #f8fafc; font-family: 'Inter', sans-serif; min-height: 100vh; }
         .glass-panel { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); }
@@ -40,6 +39,9 @@
         </div>
     </main>
 
+    <!-- ethers.js লাইব্রেরিটি একদম নিচে লোড করা হলো -->
+    <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"></script>
+
     <script>
         const contractAddress = "0xa144672B1DFc3348F0D938DE6496C031a5bcCA3D";
         const markets = [
@@ -72,32 +74,25 @@
         function selectMarket(id) { document.getElementById('marketId').value = id; }
         
         async function placeBet(isYes) {
+            if (typeof ethers === 'undefined') return alert("Ethers.js is still loading, please wait...");
+            
             const id = document.getElementById('marketId').value;
             if (!id) return alert("Please select a market first!");
             if (!window.ethereum) return alert("Please connect wallet first!");
 
             try {
-                // ethers লাইব্রেরি সঠিকভাবে লোড হয়েছে কি না নিশ্চিত করা
-                if (typeof ethers === 'undefined') throw new Error("Ethers.js not loaded!");
-
                 const provider = new ethers.providers.Web3Provider(window.ethereum);
                 const signer = provider.getSigner();
                 const contract = new ethers.Contract(contractAddress, ["function bet(uint256 _marketId, bool _prediction) external"], signer);
 
-                alert("Please confirm the transaction in MetaMask...");
-                
-                // USDC ট্রানজেকশন (এখানে value প্রয়োজন নেই)
+                alert("Please confirm in MetaMask...");
                 const tx = await contract.bet(id, isYes);
-                
-                alert("Transaction submitted. Waiting for blockchain confirmation...");
-                
-                // কনফার্মেশনের জন্য অপেক্ষা করা
+                alert("Transaction sent! Waiting for confirmation...");
                 await tx.wait(); 
-                
-                alert("Success! Your bet has been confirmed.");
+                alert("Success! Your bet is confirmed.");
             } catch (err) {
                 console.error(err);
-                alert("Transaction failed: " + (err.message || "User denied"));
+                alert("Failed: " + (err.message || "User denied"));
             }
         }
 
