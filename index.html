@@ -4,33 +4,35 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Predict.ly | Dashboard</title>
-    <!-- Tailwind CSS for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Ethers.js for Blockchain Interaction -->
-    <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js" type="application/javascript"></script>
+    <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"></script>
     <style>
-        body { background-color: #0f172a; color: white; }
+        /* ডার্ক থিম ব্যাকগ্রাউন্ড */
+        body { background-color: #0f172a; color: white; font-family: 'Inter', sans-serif; }
+        
+        /* গ্লাস ইফেক্ট কার্ড */
         .glass-panel { 
-            background: rgba(30, 41, 59, 0.5); 
-            backdrop-filter: blur(12px); 
+            background: rgba(30, 41, 59, 0.4); 
+            backdrop-filter: blur(16px); 
             border: 1px solid rgba(255, 255, 255, 0.1); 
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
         }
     </style>
 </head>
-<body class="p-8">
+<body class="p-4 md:p-8">
 
     <!-- Header -->
-    <header class="flex justify-between items-center mb-10">
+    <header class="flex justify-between items-center mb-10 max-w-7xl mx-auto">
         <h1 class="text-3xl font-bold text-white tracking-tight">Predict.ly</h1>
         <button id="connectWallet" class="bg-indigo-600 hover:bg-indigo-700 px-6 py-2 rounded-full font-medium transition">Connect Wallet</button>
     </header>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <main class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
         <!-- Markets Section -->
         <div class="lg:col-span-2">
             <h2 class="text-2xl font-semibold mb-6">Featured Predictions</h2>
             <div id="marketContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <!-- Market cards will load here -->
+                <!-- মার্কেট কার্ডগুলো এখানে JS দিয়ে লোড হবে -->
             </div>
         </div>
 
@@ -38,28 +40,19 @@
         <div class="space-y-6">
             <div class="glass-panel p-6 rounded-3xl border border-slate-700">
                 <h2 class="font-bold text-lg mb-4">Place Bet</h2>
-                <input id="marketId" type="number" placeholder="Market ID" class="w-full p-3 bg-slate-900 rounded-xl mb-4 border border-slate-700 focus:outline-none focus:border-indigo-500">
+                <input id="marketId" type="number" placeholder="Market ID" class="w-full p-4 bg-slate-950 rounded-2xl mb-4 border border-slate-700 focus:outline-none focus:border-indigo-500">
                 <div class="grid grid-cols-2 gap-3">
-                    <button onclick="placeBet(true)" class="bg-emerald-600 hover:bg-emerald-500 py-3 rounded-xl font-bold transition">YES</button>
-                    <button onclick="placeBet(false)" class="bg-rose-600 hover:bg-rose-500 py-3 rounded-xl font-bold transition">NO</button>
+                    <button onclick="placeBet(true)" class="bg-emerald-600 hover:bg-emerald-500 py-4 rounded-2xl font-bold transition">YES</button>
+                    <button onclick="placeBet(false)" class="bg-rose-600 hover:bg-rose-500 py-4 rounded-2xl font-bold transition">NO</button>
                 </div>
             </div>
         </div>
-    </div>
+    </main>
 
     <script>
+        // কন্ট্রাক্ট সেটিংস
         const contractAddress = "0xa144672B1DFc3348F0D938DE6496C031a5bcCA3D";
-        
-    
-        const contractABI = [
-            {"inputs":[],"stateMutability":"nonpayable","type":"constructor"},
-            {"inputs":[{"internalType":"uint256","name":"_marketId","type":"uint256"},{"internalType":"bool","name":"_prediction","type":"bool"}],"name":"bet","outputs":[],"stateMutability":"payable","type":"function"},
-            {"inputs":[{"internalType":"uint256","name":"_marketId","type":"uint256"}],"name":"claimWinnings","outputs":[],"stateMutability":"nonpayable","type":"function"},
-            {"inputs":[{"internalType":"string","name":"_question","type":"string"}],"name":"createMarket","outputs":[],"stateMutability":"nonpayable","type":"function"},
-            {"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"markets","outputs":[{"internalType":"string","name":"question","type":"string"},{"internalType":"bool","name":"resolved","type":"bool"},{"internalType":"bool","name":"outcome","type":"bool"},{"internalType":"uint256","name":"totalYes","type":"uint256"},{"internalType":"uint256","name":"totalNo","type":"uint256"}],"stateMutability":"view","type":"function"},
-            {"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},
-            {"inputs":[{"internalType":"uint256","name":"_marketId","type":"uint256"},{"internalType":"bool","name":"_outcome","type":"bool"}],"name":"resolveMarket","outputs":[],"stateMutability":"nonpayable","type":"function"}
-        ];
+        const contractABI = [{"inputs":[],"stateMutability":"nonpayable","type":"constructor"},{"inputs":[{"internalType":"uint256","name":"_marketId","type":"uint256"},{"internalType":"bool","name":"_prediction","type":"bool"}],"name":"bet","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[{"internalType":"uint256","name":"_marketId","type":"uint256"}],"name":"claimWinnings","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"string","name":"_question","type":"string"}],"name":"createMarket","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"markets","outputs":[{"internalType":"string","name":"question","type":"string"},{"internalType":"bool","name":"resolved","type":"bool"},{"internalType":"bool","name":"outcome","type":"bool"},{"internalType":"uint256","name":"totalYes","type":"uint256"},{"internalType":"uint256","name":"totalNo","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"_marketId","type":"uint256"},{"internalType":"bool","name":"_outcome","type":"bool"}],"name":"resolveMarket","outputs":[],"stateMutability":"nonpayable","type":"function"}];
 
         const markets = [
             { id: 1, title: "Will 'RED FORCE TV' surpass 1M views in 2024?" },
@@ -71,9 +64,9 @@
         function loadMarkets() {
             const container = document.getElementById('marketContainer');
             container.innerHTML = markets.map(m => `
-                <div class="glass-panel p-6 rounded-3xl border border-slate-700 hover:border-indigo-500 transition">
-                    <h3 class="font-bold text-lg mb-4">${m.title}</h3>
-                    <button onclick="selectMarket(${m.id})" class="bg-slate-800 hover:bg-slate-700 w-full py-2.5 rounded-xl font-semibold text-sm transition">Select Market</button>
+                <div class="glass-panel p-6 rounded-3xl border border-slate-700 hover:border-indigo-500 transition duration-300">
+                    <h3 class="font-bold text-lg mb-6">${m.title}</h3>
+                    <button onclick="selectMarket(${m.id})" class="bg-slate-800 hover:bg-slate-700 w-full py-3 rounded-xl font-semibold text-sm transition">Select Market</button>
                 </div>
             `).join('');
         }
@@ -85,28 +78,18 @@
         async function placeBet(isYes) {
             const id = document.getElementById('marketId').value;
             if (!id) return alert("Please select a market first!");
-
-            if (typeof window.ethereum !== 'undefined') {
-                try {
-                    const provider = new ethers.providers.Web3Provider(window.ethereum);
-                    await provider.send("eth_requestAccounts", []);
-                    const signer = provider.getSigner();
-                    const contract = new ethers.Contract(contractAddress, contractABI, signer);
-
-                    // বেট প্লেস করা (০.০১ ETH ডিফল্ট)
-                    const tx = await contract.bet(id, isYes, {
-                        value: ethers.utils.parseEther("0.01")
-                    });
-                    
-                    alert("Transaction sent! Wait for confirmation...");
-                    await tx.wait();
-                    alert("Bet successfully placed!");
-                } catch (error) {
-                    console.error(error);
-                    alert("Transaction failed!");
-                }
-            } else {
-                alert("Please install MetaMask to place a bet.");
+            
+            try {
+                const provider = new ethers.providers.Web3Provider(window.ethereum);
+                await provider.send("eth_requestAccounts", []);
+                const signer = provider.getSigner();
+                const contract = new ethers.Contract(contractAddress, contractABI, signer);
+                const tx = await contract.bet(id, isYes, { value: ethers.utils.parseEther("0.01") });
+                alert("Transaction submitted!");
+                await tx.wait();
+                alert("Bet confirmed!");
+            } catch (err) {
+                alert("Error: " + err.message);
             }
         }
 
