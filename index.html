@@ -46,7 +46,7 @@
         const markets = [
             { id: 1, title: "Will Bitcoin hit $120,000 before the end of 2026?" },
             { id: 2, title: "Will Ethereum surpass $5,000 this year?" },
-            { id: 3, title: "Who will win the FIFA World Cup 2026?" },
+            { id: 3, title: "Argentina will win FIFA World Cup 2026?" },
             { id: 4, title: "Will Apple release a foldable iPhone before Q4 2026?" }
         ];
 
@@ -75,13 +75,29 @@
         async function placeBet(isYes) {
             const id = document.getElementById('marketId').value;
             if (!id) return alert("Please select a market first!");
-            
             if (!window.ethereum || !window.ethereum.selectedAddress) return alert("Please connect wallet first!");
 
-            alert("Proceeding to bet on ID: " + id + " (Prediction: " + (isYes ? "YES" : "NO") + ")");
+            try {
+                const provider = new ethers.providers.Web3Provider(window.ethereum);
+                const signer = provider.getSigner();
+                const contract = new ethers.Contract(contractAddress, ["function bet(uint256 _marketId, bool _prediction) external payable"], signer);
+
+                alert("Please confirm the transaction in your MetaMask...");
+                const tx = await contract.bet(id, isYes, { value: ethers.utils.parseEther("0.01") });
+                
+                alert("Transaction sent! Waiting for confirmation...");
+                await tx.wait(); // ট্রানজেকশন নিশ্চিত হওয়ার জন্য অপেক্ষা করবে
+                
+                alert("Success! Your bet has been confirmed on the blockchain.");
+            } catch (err) {
+                console.error(err);
+                alert("Transaction failed: " + (err.message || "User denied"));
+            }
         }
 
         window.onload = loadMarkets;
     </script>
+</body>
+</html>
 </body>
 </html>
