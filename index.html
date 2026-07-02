@@ -2,159 +2,62 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Prediction Market</title>
+    <!-- Tailwind CSS for Styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Ethers.js -->
     <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"></script>
 </head>
-<body>
-    <h1>Prediction Market DApp</h1>
-    <input type="number" id="marketId" placeholder="Market ID (e.g., 0)">
-    <br><br>
-    
-    <button onclick="placeBet(true)">Bet YES</button>
-    <button onclick="placeBet(false)">Bet NO</button>
+<body class="bg-gray-900 text-white min-h-screen flex items-center justify-center p-4">
+
+    <div class="max-w-md w-full bg-gray-800 rounded-2xl shadow-2xl p-8 border border-gray-700">
+        <h1 class="text-3xl font-bold text-center mb-6 text-blue-400">Prediction Market</h1>
+        
+        <div class="mb-6">
+            <label class="block text-sm font-medium mb-2 text-gray-400">Enter Market ID</label>
+            <input type="number" id="marketId" placeholder="e.g., 0" 
+                class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 focus:outline-none focus:border-blue-500 text-white">
+        </div>
+
+        <div class="flex gap-4">
+            <button onclick="placeBet(true)" 
+                class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition duration-200">
+                Bet YES
+            </button>
+            <button onclick="placeBet(false)" 
+                class="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-lg transition duration-200">
+                Bet NO
+            </button>
+        </div>
+
+        <p id="status" class="mt-6 text-center text-sm text-gray-400"></p>
+    </div>
 
     <script>
-        const contractAddress = "0xa144672B1DFc3348F0D938DE6496C031a5bcCA3D"; 
-        const abi = [[
-	{
-		"inputs": [],
-		"stateMutability": "nonpayable",
-		"type": "constructor"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "_marketId",
-				"type": "uint256"
-			},
-			{
-				"internalType": "bool",
-				"name": "_prediction",
-				"type": "bool"
-			}
-		],
-		"name": "bet",
-		"outputs": [],
-		"stateMutability": "payable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "_marketId",
-				"type": "uint256"
-			}
-		],
-		"name": "claimWinnings",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "_question",
-				"type": "string"
-			}
-		],
-		"name": "createMarket",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"name": "markets",
-		"outputs": [
-			{
-				"internalType": "string",
-				"name": "question",
-				"type": "string"
-			},
-			{
-				"internalType": "bool",
-				"name": "resolved",
-				"type": "bool"
-			},
-			{
-				"internalType": "bool",
-				"name": "outcome",
-				"type": "bool"
-			},
-			{
-				"internalType": "uint256",
-				"name": "totalYes",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "totalNo",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "owner",
-		"outputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "_marketId",
-				"type": "uint256"
-			},
-			{
-				"internalType": "bool",
-				"name": "_outcome",
-				"type": "bool"
-			}
-		],
-		"name": "resolveMarket",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	}
-]
-            "function bet(uint256 _marketId, bool _prediction) public payable"
-        ];
+        const contractAddress = "0xa144672B1DFc3348F0D938DE6496C031a5bcCA3D";
+        const abi = [{"inputs":[],"stateMutability":"nonpayable","type":"constructor"},{"inputs":[{"internalType":"uint256","name":"_marketId","type":"uint256"},{"internalType":"bool","name":"_prediction","type":"bool"}],"name":"bet","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[{"internalType":"uint256","name":"_marketId","type":"uint256"}],"name":"claimWinnings","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"string","name":"_question","type":"string"}],"name":"createMarket","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"markets","outputs":[{"internalType":"string","name":"question","type":"string"},{"internalType":"bool","name":"resolved","type":"bool"},{"internalType":"bool","name":"outcome","type":"bool"},{"internalType":"uint256","name":"totalYes","type":"uint256"},{"internalType":"uint256","name":"totalNo","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"_marketId","type":"uint256"},{"internalType":"bool","name":"_outcome","type":"bool"}],"name":"resolveMarket","outputs":[],"stateMutability":"nonpayable","type":"function"}];
 
         async function placeBet(isYes) {
+            const statusEl = document.getElementById('status');
             if (window.ethereum) {
-                const provider = new ethers.providers.Web3Provider(window.ethereum);
-                await provider.send("eth_requestAccounts", []);
-                const signer = provider.getSigner();
-                const contract = new ethers.Contract(contractAddress, abi, signer);
-
-                const mId = document.getElementById('marketId').value;
-
                 try {
+                    const provider = new ethers.providers.Web3Provider(window.ethereum);
+                    await provider.send("eth_requestAccounts", []);
+                    const signer = provider.getSigner();
+                    const contract = new ethers.Contract(contractAddress, abi, signer);
+                    const mId = document.getElementById('marketId').value;
+                    
+                    if(!mId) { alert("Please enter a Market ID"); return; }
+
+                    statusEl.innerText = "Processing transaction...";
                     const tx = await contract.bet(mId, isYes, { value: ethers.utils.parseEther("0.01") });
-                    alert("Transaction sent! Please wait...");
+                    
+                    statusEl.innerText = "Transaction sent! Waiting for confirmation...";
                     await tx.wait();
-                    alert("Success! Your bet has been placed.");
+                    statusEl.innerText = "Success! Your bet has been placed.";
                 } catch (error) {
-                    alert("Error: " + error.message);
+                    statusEl.innerText = "Error: " + error.message;
                 }
             } else {
                 alert("Please install MetaMask!");
