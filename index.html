@@ -6,7 +6,11 @@
     <title>Prediction Arc | Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        .glass-card { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .glass-card { 
+            background: rgba(30, 41, 59, 0.7); 
+            backdrop-filter: blur(12px); 
+            border: 1px solid rgba(255, 255, 255, 0.1); 
+        }
     </style>
 </head>
 <body class="bg-slate-950 text-white min-h-screen p-8">
@@ -28,6 +32,7 @@
 
         <!-- Sidebar (Right) -->
         <div class="space-y-6">
+            <!-- Place Bet Section -->
             <div class="glass-card p-6 rounded-2xl">
                 <h2 class="font-bold mb-4">Place Bet</h2>
                 <input id="marketId" type="number" placeholder="Market ID" class="w-full p-3 bg-slate-900 rounded-lg mb-4 border border-slate-700">
@@ -37,6 +42,7 @@
                 </div>
             </div>
 
+            <!-- Transaction History Section -->
             <div class="glass-card p-6 rounded-2xl">
                 <h2 class="font-bold mb-4">Transaction History</h2>
                 <div id="history" class="text-sm text-slate-400 space-y-2">
@@ -47,6 +53,7 @@
     </div>
 
     <script>
+        // Market data
         const markets = [
             { id: 1, title: "Will BTC hit $100k?" },
             { id: 2, title: "Is AI the future?" },
@@ -54,6 +61,7 @@
             { id: 4, title: "New Ethereum ATH?" }
         ];
 
+        // Function to render markets
         function loadMarkets() {
             const list = document.getElementById('marketList');
             list.innerHTML = markets.map(m => `
@@ -64,18 +72,22 @@
             `).join('');
         }
 
+        // Function to select market
         function selectMarket(id) {
             document.getElementById('marketId').value = id;
         }
 
+        // Function to place bet
         function placeBet(isYes) {
             const id = document.getElementById('marketId').value;
             if (!id) return alert("Please select a market first!");
             alert("Bet placed on ID " + id + ": " + (isYes ? 'YES' : 'NO'));
         }
 
+        // Wallet connect button action
         document.getElementById('walletBtn').onclick = () => alert("Connecting Wallet...");
         
+        // Load markets on page load
         window.onload = loadMarkets;
     </script>
 </body>
