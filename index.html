@@ -3,120 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prediction Arc | Modern Prediction Market</title>
+    <title>Prediction Arc | Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"></script>
     <style>
         .glass-card { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .gradient-text { background: linear-gradient(to right, #60a5fa, #a855f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
     </style>
 </head>
-<body class="bg-slate-950 text-white min-h-screen font-sans p-4">
+<body class="bg-slate-950 text-white min-h-screen p-8">
 
-    <header class="p-8 text-center">
-        <h1 class="text-5xl font-extrabold gradient-text">Prediction Arc</h1>
-        <p class="text-slate-400 mt-2 text-lg">Decentralized Prediction Market</p>
+    <!-- Header -->
+    <header class="flex justify-between items-center mb-10">
+        <h1 class="text-3xl font-bold text-blue-400">Prediction Arc</h1>
+        <button id="walletBtn" class="bg-blue-600 px-6 py-2 rounded-full hover:bg-blue-700 transition">Connect Wallet</button>
     </header>
 
-    <main class="max-w-xl mx-auto">
-        <!-- Create New Market Form -->
-        <div class="glass-card rounded-3xl p-8 shadow-2xl mb-8">
-            <h2 class="text-xl font-bold mb-4 text-slate-200">Create New Market</h2>
-            <input type="text" id="newQuestion" placeholder="Enter your question here..." 
-                class="w-full p-4 rounded-xl bg-slate-900 border border-slate-700 mb-4 outline-none focus:ring-2 focus:ring-blue-500">
-            <button onclick="createNewMarket()" 
-                class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-xl font-bold transition">
-                Create Market
-            </button>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Market Section (Left) -->
+        <div class="lg:col-span-2">
+            <h2 class="text-xl font-bold mb-6">Active Markets</h2>
+            <div id="marketList" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- 4 Market Cards -->
+                <div class="glass-card p-6 rounded-2xl border border-slate-700">
+                    <h3 class="font-bold mb-4">ID #1: Will BTC hit $100k?</h3>
+                    <button class="w-full bg-slate-800 py-2 rounded-lg hover:bg-slate-700">Select</button>
+                </div>
+                <div class="glass-card p-6 rounded-2xl border border-slate-700">
+                    <h3 class="font-bold mb-4">ID #2: Is AI the future?</h3>
+                    <button class="w-full bg-slate-800 py-2 rounded-lg hover:bg-slate-700">Select</button>
+                </div>
+                <div class="glass-card p-6 rounded-2xl border border-slate-700">
+                    <h3 class="font-bold mb-4">ID #3: Gold prices up?</h3>
+                    <button class="w-full bg-slate-800 py-2 rounded-lg hover:bg-slate-700">Select</button>
+                </div>
+                <div class="glass-card p-6 rounded-2xl border border-slate-700">
+                    <h3 class="font-bold mb-4">ID #4: New Ethereum ATH?</h3>
+                    <button class="w-full bg-slate-800 py-2 rounded-lg hover:bg-slate-700">Select</button>
+                </div>
+            </div>
         </div>
 
-        <!-- Betting Card -->
-        <div class="glass-card rounded-3xl p-8 shadow-2xl mb-8">
-            <div class="mb-6">
-                <label class="block text-sm font-semibold text-slate-300 mb-2">Market ID</label>
-                <input type="number" id="marketId" placeholder="e.g., 0" 
-                    class="w-full p-4 rounded-xl bg-slate-900 border border-slate-700 focus:ring-2 focus:ring-blue-500 outline-none transition">
+        <!-- Sidebar (Right: Bet & History) -->
+        <div class="space-y-6">
+            <div class="glass-card p-6 rounded-2xl">
+                <h2 class="font-bold mb-4">Place Bet</h2>
+                <input type="number" placeholder="Market ID" class="w-full p-3 bg-slate-900 rounded-lg mb-4 border border-slate-700">
+                <div class="grid grid-cols-2 gap-2">
+                    <button class="bg-emerald-600 py-2 rounded-lg">YES</button>
+                    <button class="bg-rose-600 py-2 rounded-lg">NO</button>
+                </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-4">
-                <button onclick="placeBet(true)" class="bg-emerald-600 hover:bg-emerald-500 py-4 rounded-xl font-bold transition transform active:scale-95 shadow-lg shadow-emerald-900/20">YES</button>
-                <button onclick="placeBet(false)" class="bg-rose-600 hover:bg-rose-500 py-4 rounded-xl font-bold transition transform active:scale-95 shadow-lg shadow-rose-900/20">NO</button>
+            <div class="glass-card p-6 rounded-2xl">
+                <h2 class="font-bold mb-4">Transaction History</h2>
+                <div class="text-sm text-slate-400 space-y-2">
+                    <p>No recent activity.</p>
+                </div>
             </div>
-            <p id="status" class="mt-6 text-center text-sm text-blue-300 font-medium"></p>
         </div>
-
-        <!-- Market List -->
-        <div id="marketContainer" class="space-y-4">
-            <h2 class="text-xl font-bold text-slate-300 mb-4">Active Markets</h2>
-        </div>
-    </main>
+    </div>
 
     <script>
-        const contractAddress = "0xa144672B1DFc3348F0D938DE6496C031a5bcCA3D";
-        const abi = [{"inputs":[],"stateMutability":"nonpayable","type":"constructor"},{"inputs":[{"internalType":"uint256","name":"_marketId","type":"uint256"},{"internalType":"bool","name":"_prediction","type":"bool"}],"name":"bet","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[{"internalType":"uint256","name":"_marketId","type":"uint256"}],"name":"claimWinnings","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"string","name":"_question","type":"string"}],"name":"createMarket","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"markets","outputs":[{"internalType":"string","name":"question","type":"string"},{"internalType":"bool","name":"resolved","type":"bool"},{"internalType":"bool","name":"outcome","type":"bool"},{"internalType":"uint256","name":"totalYes","type":"uint256"},{"internalType":"uint256","name":"totalNo","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"_marketId","type":"uint256"},{"internalType":"bool","name":"_outcome","type":"bool"}],"name":"resolveMarket","outputs":[],"stateMutability":"nonpayable","type":"function"}];
-
-        // Function to create new market
-        async function createNewMarket() {
-            const question = document.getElementById('newQuestion').value;
-            if (!question) return alert("Please enter a question!");
-            const statusEl = document.getElementById('status');
-            try {
-                const provider = new ethers.providers.Web3Provider(window.ethereum);
-                const signer = provider.getSigner();
-                const contract = new ethers.Contract(contractAddress, abi, signer);
-                statusEl.innerText = "Creating market... Check your MetaMask.";
-                const tx = await contract.createMarket(question);
-                await tx.wait();
-                statusEl.innerText = "Market created successfully!";
-                location.reload();
-            } catch (error) {
-                statusEl.innerText = "Error: " + error.message;
-            }
-        }
-
-        async function placeBet(isYes) {
-            const statusEl = document.getElementById('status');
-            try {
-                if (!window.ethereum) return alert("Please install MetaMask!");
-                const provider = new ethers.providers.Web3Provider(window.ethereum);
-                await provider.send("eth_requestAccounts", []);
-                const signer = provider.getSigner();
-                const contract = new ethers.Contract(contractAddress, abi, signer);
-                const mId = document.getElementById('marketId').value;
-                statusEl.innerText = "Confirm transaction in MetaMask...";
-                const tx = await contract.bet(mId, isYes, { value: ethers.utils.parseEther("0.01") });
-                statusEl.innerText = "Betting... Please wait.";
-                await tx.wait();
-                statusEl.innerText = "Success! Your bet has been placed.";
-            } catch (error) {
-                statusEl.innerText = "Error: " + error.message;
-            }
-        }
-
-        async function loadMarkets() {
-            const container = document.getElementById('marketContainer');
-            const provider = ethers.getDefaultProvider("homestead");
-            const contract = new ethers.Contract(contractAddress, abi, provider);
-            for (let i = 1; i <= 4; i++) {
-                try {
-                    const market = await contract.markets(i);
-                    if (market.question) {
-                        const div = document.createElement('div');
-                        div.className = "glass-card p-5 rounded-xl border border-slate-700 flex justify-between items-center";
-                        div.innerHTML = `
-                            <div>
-                                <p class="font-bold text-white">ID #${i}: ${market.question}</p>
-                                <p class="text-xs text-slate-400">Yes: ${market.totalYes.toString()} | No: ${market.totalNo.toString()}</p>
-                            </div>
-                            <button onclick="document.getElementById('marketId').value = ${i}" 
-                                class="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-lg text-sm transition">Select</button>
-                        `;
-                        container.appendChild(div);
-                    }
-                } catch (e) { break; }
-            }
-        }
-        window.onload = loadMarkets;
+        document.getElementById('walletBtn').onclick = () => alert("Connecting Wallet...");
     </script>
 </body>
 </html>
