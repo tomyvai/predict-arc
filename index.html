@@ -55,7 +55,7 @@
                 try {
                     const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
                     document.getElementById('connectWallet').innerText = "Connected: " + accounts[0].substring(0, 6) + "...";
-                } catch (error) { alert("User denied account access"); }
+                } catch (error) { alert("User denied access"); }
             } else { alert("Please install MetaMask!"); }
         }
 
@@ -75,29 +75,29 @@
         async function placeBet(isYes) {
             const id = document.getElementById('marketId').value;
             if (!id) return alert("Please select a market first!");
-            if (!window.ethereum || !window.ethereum.selectedAddress) return alert("Please connect wallet first!");
+            if (!window.ethereum) return alert("Please connect wallet first!");
 
             try {
                 const provider = new ethers.providers.Web3Provider(window.ethereum);
                 const signer = provider.getSigner();
                 const contract = new ethers.Contract(contractAddress, ["function bet(uint256 _marketId, bool _prediction) external payable"], signer);
 
-                alert("Please confirm the transaction in your MetaMask...");
+                alert("Please confirm the transaction in MetaMask...");
+                
+                // Native coin (ETH/BNB/MATIC) transfer
                 const tx = await contract.bet(id, isYes, { value: ethers.utils.parseEther("0.01") });
                 
-                alert("Transaction sent! Waiting for confirmation...");
-                await tx.wait(); // ট্রানজেকশন নিশ্চিত হওয়ার জন্য অপেক্ষা করবে
+                alert("Transaction submitted. Waiting for confirmation...");
+                await tx.wait(); 
                 
-                alert("Success! Your bet has been confirmed on the blockchain.");
+                alert("Success! Your bet is confirmed.");
             } catch (err) {
                 console.error(err);
-                alert("Transaction failed: " + (err.message || "User denied"));
+                alert("Transaction failed: " + (err.message || "Denied"));
             }
         }
 
         window.onload = loadMarkets;
     </script>
-</body>
-</html>
 </body>
 </html>
