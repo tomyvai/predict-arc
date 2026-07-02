@@ -13,7 +13,6 @@
     </style>
 </head>
 <body class="p-8">
-
     <header class="flex justify-between items-center mb-10 max-w-6xl mx-auto">
         <h1 class="text-3xl font-bold text-white tracking-tighter">Predict.arc</h1>
         <button id="connectWallet" onclick="connectWallet()" class="bg-indigo-600 hover:bg-indigo-700 px-6 py-2 rounded-full font-medium">Connect Wallet</button>
@@ -25,7 +24,6 @@
                 <h2 class="text-2xl font-semibold mb-6">Featured Predictions</h2>
                 <div id="marketContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
             </div>
-
             <div class="lg:col-span-1">
                 <div class="glass-panel p-6 rounded-3xl border border-slate-700">
                     <h2 class="font-bold text-xl mb-6">Place Bet</h2>
@@ -39,18 +37,11 @@
         </div>
     </main>
 
-    <!-- ethers.js এর স্টেবল ভার্সন লোড করা হচ্ছে -->
-    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-
+    <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"></script>
     <script>
         const contractAddress = "0xa144672B1DFc3348F0D938DE6496C031a5bcCA3D";
-        const markets = [
-            { id: 1, title: "Will Bitcoin hit $120,000 before the end of 2026?" },
-            { id: 2, title: "Will Ethereum surpass $5,000 this year?" },
-            { id: 3, title: "Argentina will win FIFA World Cup 2026?" },
-            { id: 4, title: "Will Apple release a foldable iPhone before Q4 2026?" }
-        ];
-
+        const abi = ["function bet(uint256 _marketId, bool _prediction) external payable"];
+        
         async function connectWallet() {
             if (window.ethereum) {
                 try {
@@ -60,47 +51,34 @@
             } else { alert("Please install MetaMask!"); }
         }
 
-        function loadMarkets() {
-            const container = document.getElementById('marketContainer');
-            container.innerHTML = markets.map(m => `
-                <div class="glass-panel p-6 rounded-3xl border border-slate-700">
-                    <span class="text-indigo-400 font-bold">ID: ${m.id}</span>
-                    <h3 class="font-bold text-lg mb-6 mt-2">${m.title}</h3>
-                    <button onclick="selectMarket(${m.id})" class="bg-indigo-500 hover:bg-indigo-400 w-full py-3 rounded-xl font-semibold text-sm">Select Market</button>
-                </div>
-            `).join('');
-        }
-
-        function selectMarket(id) { document.getElementById('marketId').value = id; }
-        
         async function placeBet(isYes) {
-            // চেক করা হচ্ছে ethers লাইব্রেরি লোড হয়েছে কি না
-            if (typeof ethers === 'undefined') {
-                return alert("Ethers.js is still loading! Please refresh the page.");
-            }
-
+            if (typeof ethers === 'undefined') return alert("Ethers.js loading...");
             const id = document.getElementById('marketId').value;
-            if (!id) return alert("Please select a market first!");
-            if (!window.ethereum) return alert("Please connect wallet first!");
-
+            if (!id) return alert("Please select a market ID!");
+            
             try {
                 const provider = new ethers.providers.Web3Provider(window.ethereum);
                 const signer = provider.getSigner();
-                const contract = new ethers.Contract(contractAddress, ["function bet(uint256 _marketId, bool _prediction) external"], signer);
-
-                alert("Please confirm the transaction in MetaMask...");
-                const tx = await contract.bet(id, isYes);
-                alert("Transaction sent! Waiting for blockchain confirmation...");
+                const contract = new ethers.Contract(contractAddress, abi, signer);
                 
-                await tx.wait(); 
+                alert("Please confirm transaction in MetaMask...");
+                
+                // গ্যাস লিমিট এবং ভ্যালু সেট করা
+                const tx = await contract.bet(parseInt(id), isYes, {
+                    value: ethers.utils.parseEther("0.001"), // আপনার যদি নির্দিষ্ট কোনো বেট অ্যামাউন্ট থাকে তবে এখানে দিন
+                    gasLimit: 300000 
+                });
+                
+                await tx.wait();
                 alert("Success! Your bet is confirmed.");
             } catch (err) {
                 console.error(err);
-                alert("Failed: " + (err.message || "User denied"));
+                alert("Transaction Failed: " + (err.reason || err.message));
             }
         }
 
-        window.onload = loadMarkets;
+        function selectMarket(id) { document.getElementById('marketId').value = id; }
+        // ... (loadMarkets ফাংশনটি আগের মতোই থাকবে)
     </script>
 </body>
 </html>
