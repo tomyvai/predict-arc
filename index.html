@@ -2,112 +2,94 @@
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
-    <title>Prediction Market DApp</title>
-    <!-- Ethers.js, Web3Modal, এবং WalletConnect CDN -->
+    <title>Futura Prediction Market</title>
+    <!-- Ethers.js লাইব্রেরি -->
     <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"></script>
-    <script src="https://unpkg.com/web3modal@1.9.12/dist/index.js"></script>
-    <script src="https://unpkg.com/@walletconnect/web3-provider@1.8.0/dist/umd/index.min.js"></script>
     
     <style>
-        /* মডার্ন ফন্ট এবং ব্যাকগ্রাউন্ড */
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 500px; margin: 40px auto; padding: 20px; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); min-height: 100vh; }
+        /* Dark Theme CSS */
+        body { font-family: 'Segoe UI', sans-serif; background-color: #0d1117; color: #e6edf3; margin: 0; padding: 20px; }
+        .container { max-width: 800px; margin: auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 20px; background: #161b22; border-radius: 12px; margin-bottom: 20px; }
+        .market-card { background: #161b22; padding: 20px; border-radius: 12px; border: 1px solid #30363d; margin-bottom: 20px; }
         
-        /* কার্ড স্টাইল */
-        .card { background: #ffffff; padding: 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.3); }
-        h1, h3 { color: #2d3436; text-align: center; }
+        input { background: #0d1117; border: 1px solid #30363d; color: white; padding: 12px; width: 100%; border-radius: 8px; margin: 10px 0; box-sizing: border-box; }
+        button { padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s; }
         
-        /* ইনপুট ফিল্ড */
-        input { width: 100%; padding: 14px; margin: 10px 0; border: 2px solid #edf2f7; border-radius: 12px; box-sizing: border-box; font-size: 16px; transition: 0.3s; }
-        input:focus { border-color: #6c5ce7; outline: none; }
-        
-        /* বাটন ডিজাইন */
-        button { width: 100%; padding: 14px; border: none; border-radius: 12px; color: white; font-weight: 600; cursor: pointer; margin-top: 10px; transition: 0.3s transform; }
-        button:active { transform: scale(0.98); }
-        
-        .btn-connect { background: #6c5ce7; }
-        .btn-create { background: #0984e3; }
-        .bet-buttons { display: flex; gap: 10px; margin-top: 10px; }
-        .btn-yes { background: #00b894; flex: 1; }
-        .btn-no { background: #d63031; flex: 1; }
+        .btn-connect { background: #238636; color: white; }
+        .btn-create { background: #58a6ff; color: white; width: 100%; }
+        .btn-yes { background: #1f883d; color: white; flex: 1; }
+        .btn-no { background: #cf222e; color: white; flex: 1; }
+        .btn-group { display: flex; gap: 10px; margin-top: 15px; }
     </style>
 </head>
 <body>
 
-    <div class="card">
-        <h1>Prediction Market</h1>
-        <button id="btn-connect" class="btn-connect" onclick="connectWallet()">Wallet কানেক্ট করুন</button>
-        <p id="wallet-address" style="text-align: center; color: green; font-size: 0.9em;"></p>
+<div class="container">
+    <div class="header">
+        <h2>Futura Markets</h2>
+        <button class="btn-connect" onclick="connectWallet()">Connect Wallet</button>
     </div>
 
-    <div class="card">
-        <h3>নতুন মার্কেট তৈরি</h3>
+    <!-- মার্কেট তৈরির কার্ড -->
+    <div class="market-card">
+        <h3>Create New Market</h3>
         <input type="text" id="question" placeholder="প্রশ্ন লিখুন...">
-        <button class="btn-create" onclick="createMarket()">Market তৈরি করুন</button>
+        <button class="btn-create" onclick="createMarket()">Create Market</button>
     </div>
 
-    <div class="card">
-        <h3>বাজি ধরুন</h3>
-        <input type="number" id="marketId" placeholder="Market ID">
-        <input type="number" id="betAmount" placeholder="ETH পরিমাণ (যেমন: 0.01)">
-        <div class="bet-buttons">
+    <!-- বাজি ধরার কার্ড -->
+    <div class="market-card">
+        <h3>Place Your Bet</h3>
+        <input type="number" id="mId" placeholder="Market ID">
+        <input type="number" id="amount" placeholder="ETH পরিমাণ (যেমন: 0.01)">
+        <div class="btn-group">
             <button class="btn-yes" onclick="bet(true)">YES</button>
             <button class="btn-no" onclick="bet(false)">NO</button>
         </div>
     </div>
+</div>
 
-    <script>
-        const contractAddress = "0x459b226eE3192603260c9c94d78F5173BA040f2c";
-        const abi = [
-            {"inputs":[],"stateMutability":"nonpayable","type":"constructor"},
-            {"inputs":[{"internalType":"uint256","name":"_marketId","type":"uint256"},{"internalType":"bool","name":"_prediction","type":"bool"}],"name":"bet","outputs":[],"stateMutability":"payable","type":"function"},
-            {"inputs":[{"internalType":"uint256","name":"_marketId","type":"uint256"}],"name":"claimWinnings","outputs":[],"stateMutability":"nonpayable","type":"function"},
-            {"inputs":[{"internalType":"string","name":"_question","type":"string"}],"name":"createMarket","outputs":[],"stateMutability":"nonpayable","type":"function"},
-            {"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"markets","outputs":[{"internalType":"string","name":"question","type":"string"},{"internalType":"bool","name":"resolved","type":"bool"},{"internalType":"bool","name":"outcome","type":"bool"},{"internalType":"uint256","name":"totalYes","type":"uint256"},{"internalType":"uint256","name":"totalNo","type":"uint256"}],"stateMutability":"view","type":"function"},
-            {"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},
-            {"inputs":[{"internalType":"uint256","name":"_marketId","type":"uint256"},{"internalType":"bool","name":"_outcome","type":"bool"}],"name":"resolveMarket","outputs":[],"stateMutability":"nonpayable","type":"function"}
-        ];
+<script>
+    const contractAddress = "0x459b226eE3192603260c9c94d78F5173BA040f2c";
+    const abi = [
+        {"inputs":[],"stateMutability":"nonpayable","type":"constructor"},
+        {"inputs":[{"internalType":"uint256","name":"_marketId","type":"uint256"},{"internalType":"bool","name":"_prediction","type":"bool"}],"name":"bet","outputs":[],"stateMutability":"payable","type":"function"},
+        {"inputs":[{"internalType":"uint256","name":"_marketId","type":"uint256"}],"name":"claimWinnings","outputs":[],"stateMutability":"nonpayable","type":"function"},
+        {"inputs":[{"internalType":"string","name":"_question","type":"string"}],"name":"createMarket","outputs":[],"stateMutability":"nonpayable","type":"function"},
+        {"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"markets","outputs":[{"internalType":"string","name":"question","type":"string"},{"internalType":"bool","name":"resolved","type":"bool"},{"internalType":"bool","name":"outcome","type":"bool"},{"internalType":"uint256","name":"totalYes","type":"uint256"},{"internalType":"uint256","name":"totalNo","type":"uint256"}],"stateMutability":"view","type":"function"},
+        {"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},
+        {"inputs":[{"internalType":"uint256","name":"_marketId","type":"uint256"},{"internalType":"bool","name":"_outcome","type":"bool"}],"name":"resolveMarket","outputs":[],"stateMutability":"nonpayable","type":"function"}
+    ];
 
-        // Web3Modal Setup
-        const Web3Modal = window.Web3Modal.default;
-        const web3Modal = new Web3Modal({
-            cacheProvider: true,
-            providerOptions: {
-                walletconnect: {
-                    package: WalletConnectProvider,
-                    options: { infuraId: "27e484dcd9e3efcfd25a83a78777cdf1" }
-                }
-            }
+    let signer;
+
+    async function connectWallet() {
+        if (!window.ethereum) return alert("MetaMask ইনস্টল করুন!");
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        await provider.send("eth_requestAccounts", []);
+        signer = provider.getSigner();
+        alert("Wallet Connected!");
+    }
+
+    async function createMarket() {
+        if (!signer) return alert("Wallet কানেক্ট করুন!");
+        const contract = new ethers.Contract(contractAddress, abi, signer);
+        const q = document.getElementById('question').value;
+        await contract.createMarket(q);
+    }
+
+    async function bet(prediction) {
+        if (!signer) return alert("Wallet কানেক্ট করুন!");
+        const contract = new ethers.Contract(contractAddress, abi, signer);
+        const id = document.getElementById('mId').value;
+        const amount = document.getElementById('amount').value;
+        
+        await contract.bet(id, prediction, { 
+            value: ethers.utils.parseEther(amount) 
         });
+    }
+</script>
 
-        let signer;
-
-        async function connectWallet() {
-            try {
-                const instance = await web3Modal.connect();
-                const provider = new ethers.providers.Web3Provider(instance);
-                signer = provider.getSigner();
-                const address = await signer.getAddress();
-                document.getElementById("wallet-address").innerText = "Connected: " + address.substring(0,6) + "...";
-                document.getElementById("btn-connect").innerText = "Wallet Connected";
-            } catch (err) {
-                console.error("Connection failed:", err);
-            }
-        }
-
-        async function createMarket() {
-            if (!signer) return alert("প্রথমে ওয়ালেট কানেক্ট করুন!");
-            const contract = new ethers.Contract(contractAddress, abi, signer);
-            const question = document.getElementById("question").value;
-            await contract.createMarket(question);
-        }
-
-        async function bet(prediction) {
-            if (!signer) return alert("প্রথমে ওয়ালেট কানেক্ট করুন!");
-            const contract = new ethers.Contract(contractAddress, abi, signer);
-            const id = document.getElementById("marketId").value;
-            const amount = document.getElementById("betAmount").value;
-            await contract.bet(id, prediction, { value: ethers.utils.parseEther(amount) });
-        }
-    </script>
 </body>
 </html>
