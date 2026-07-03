@@ -2,64 +2,71 @@
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
-    <title>Futura Markets Dashboard</title>
+    <title>Futura Markets</title>
     <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"></script>
     <style>
-        :root { --bg: #0d1117; --card-bg: #161b22; --border: #30363d; --text: #c9d1d9; --accent: #58a6ff; }
-        body { background-color: var(--bg); color: var(--text); font-family: -apple-system, sans-serif; margin: 0; display: flex; }
-
-        /* Sidebar */
-        .sidebar { width: 250px; height: 100vh; background: #010409; border-right: 1px solid var(--border); padding: 20px; }
-        
-        /* Main Content */
-        .main { flex: 1; padding: 30px; overflow-y: auto; }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-        
-        /* Cards */
-        .market-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 25px; margin-bottom: 20px; }
-        .btn-yes { background: #238636; border: none; color: white; padding: 10px 20px; border-radius: 6px; cursor: pointer; }
-        .btn-no { background: #da3633; border: none; color: white; padding: 10px 20px; border-radius: 6px; cursor: pointer; }
-        
-        button { cursor: pointer; font-weight: 600; transition: 0.2s; }
-        button:hover { opacity: 0.9; }
+        :root { --bg: #0d1117; --card-bg: #161b22; --accent: #58a6ff; }
+        body { background: var(--bg); color: #c9d1d9; font-family: sans-serif; margin: 0; display: flex; }
+        .sidebar { width: 260px; height: 100vh; background: #010409; border-right: 1px solid #30363d; padding: 20px; }
+        .main { flex: 1; padding: 40px; }
+        .market-card { background: var(--card-bg); border: 1px solid #30363d; border-radius: 12px; padding: 20px; margin-bottom: 20px; transition: 0.3s; }
+        .market-card:hover { border-color: var(--accent); }
+        .btn-yes { background: #238636; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; }
+        .btn-no { background: #da3633; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div class="sidebar">
     <h2 style="color: var(--accent);">Futura Markets</h2>
-    <p>Market Explorer</p>
+    <p>আপনার প্রেডিকশন করুন</p>
 </div>
 
 <div class="main">
-    <div class="header">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
         <h1>Active Markets</h1>
-        <button id="connectBtn" onclick="connectWallet()" style="background: var(--accent); color: white; border: none; padding: 10px 20px; border-radius: 6px;">Connect Wallet</button>
+        <button onclick="connectWallet()" id="connectBtn" style="padding:10px 20px; cursor:pointer;">Connect Wallet</button>
     </div>
 
-    <!-- মার্কেট কার্ড -->
+    <!-- নতুন প্রশ্ন যোগ করতে চাইলে নিচের এই অংশটি কপি-পেস্ট করুন -->
     <div class="market-card">
-        <h3>Will the price of ETH go up today?</h3>
-        <p style="color: #8b949e;">Market ID: 0 | Volume: 0.5 ETH</p>
-        <div style="display: flex; gap: 10px;">
-            <button class="btn-yes" onclick="bet(0, true)">YES @ 0.78</button>
-            <button class="btn-no" onclick="bet(0, false)">NO @ 0.22</button>
+        <h3>ETH কি আজ বাড়বে?</h3>
+        <p>Market ID: 0</p>
+        <div style="display:flex; gap:10px;">
+            <button class="btn-yes" onclick="bet(0, true)">YES</button>
+            <button class="btn-no" onclick="bet(0, false)">NO</button>
+        </div>
+    </div>
+
+    <div class="market-card">
+        <h3>আগামীকাল কি বৃষ্টি হবে?</h3>
+        <p>Market ID: 1</p>
+        <div style="display:flex; gap:10px;">
+            <button class="btn-yes" onclick="bet(1, true)">YES</button>
+            <button class="btn-no" onclick="bet(1, false)">NO</button>
+        </div>
+    </div>
+    
+    <div class="market-card">
+        <h3>বিটকয়েন কি নতুন রেকর্ড করবে?</h3>
+        <p>Market ID: 2</p>
+        <div style="display:flex; gap:10px;">
+            <button class="btn-yes" onclick="bet(2, true)">YES</button>
+            <button class="btn-no" onclick="bet(2, false)">NO</button>
         </div>
     </div>
 </div>
 
 <script>
     const contractAddress = "0x459b226eE3192603260c9c94d78F5173BA040f2c";
-    const abi = [{"inputs":[],"stateMutability":"nonpayable","type":"constructor"},{"inputs":[{"internalType":"uint256","name":"_marketId","type":"uint256"},{"internalType":"bool","name":"_prediction","type":"bool"}],"name":"bet","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[{"internalType":"string","name":"_question","type":"string"}],"name":"createMarket","outputs":[],"stateMutability":"nonpayable","type":"function"}];
-
+    const abi = [{"inputs":[{"internalType":"uint256","name":"_marketId","type":"uint256"},{"internalType":"bool","name":"_prediction","type":"bool"}],"name":"bet","outputs":[],"stateMutability":"payable","type":"function"}];
     let signer;
 
     async function connectWallet() {
-        if (!window.ethereum) return alert("MetaMask ইনস্টল করুন!");
         const provider = new ethers.providers.Web3Provider(window.ethereum);
         await window.ethereum.request({ method: 'eth_requestAccounts' });
         signer = provider.getSigner();
-        document.getElementById("connectBtn").innerText = "Wallet Connected";
+        document.getElementById("connectBtn").innerText = "Connected";
     }
 
     async function bet(id, pred) {
