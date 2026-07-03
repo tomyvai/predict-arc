@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Predict Arc</title>
+    <!-- এটি সব সময় উপরে থাকবে -->
     <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"></script>
     <style>
         :root { --bg: #0d1117; --card-bg: #161b22; --accent: #58a6ff; }
@@ -23,44 +24,39 @@
 <div class="main">
     <div style="display:flex; justify-content:space-between; align-items:center;">
         <h1>Active Markets</h1>
-        <button onclick="connectWallet()" id="connectBtn" style="padding:10px 20px; cursor:pointer;">Connect Wallet</button>
+        <!-- লোড হওয়ার আগে যেন কেউ ক্লিক না করে তার জন্য আইডি -->
+        <button id="connectBtn" onclick="connectWallet()" style="padding:10px 20px; cursor:pointer;">Connect Wallet</button>
     </div>
 
-    <!-- মার্কেট ১ -->
     <div class="market-card">
         <h3>Will ETH price go up today?</h3>
         <p>Market ID: 0</p>
         <button class="btn-yes" onclick="bet(0, true)">YES</button>
         <button class="btn-no" onclick="bet(0, false)">NO</button>
     </div>
-
-    <!-- মার্কেট ২ -->
-    <div class="market-card">
-        <h3>Will it rain tomorrow?</h3>
-        <p>Market ID: 1</p>
-        <button class="btn-yes" onclick="bet(1, true)">YES</button>
-        <button class="btn-no" onclick="bet(1, false)">NO</button>
-    </div>
-    
-    <!-- মার্কেট ৩ -->
-    <div class="market-card">
-        <h3>Will BTC reach 70k?</h3>
-        <p>Market ID: 2</p>
-        <button class="btn-yes" onclick="bet(2, true)">YES</button>
-        <button class="btn-no" onclick="bet(2, false)">NO</button>
-    </div>
 </div>
 
 <script>
+    // লাইব্রেরি লোড হয়েছে কিনা চেক করার ফাংশন
+    function checkEthers() {
+        if (typeof ethers === 'undefined') {
+            alert("Waiting for library to load... Please wait 2 seconds and try again.");
+            return false;
+        }
+        return true;
+    }
+
     const contractAddress = "0x459b226eE3192603260c9c94d78F5173BA040f2c";
     const abi = [{"inputs":[{"internalType":"uint256","name":"_marketId","type":"uint256"},{"internalType":"bool","name":"_prediction","type":"bool"}],"name":"bet","outputs":[],"stateMutability":"payable","type":"function"}];
     
     let signer;
 
     async function connectWallet() {
+        if (!checkEthers()) return;
+        
         if (typeof window.ethereum === 'undefined') return alert("MetaMask not found!");
+        
         try {
-            // পুরাতন সেশন ক্লিয়ার করার জন্য রিকোয়েস্ট
             await window.ethereum.request({ method: 'eth_requestAccounts' });
             const provider = new ethers.providers.Web3Provider(window.ethereum);
             signer = provider.getSigner();
@@ -71,10 +67,11 @@
     }
 
     async function bet(id, pred) {
+        if (!checkEthers()) return;
         if (!signer) return alert("Please connect wallet first!");
+        
         try {
             const contract = new ethers.Contract(contractAddress, abi, signer);
-            // ট্রানজ্যাকশন রিকোয়েস্ট
             const tx = await contract.bet(id, pred, { value: ethers.utils.parseEther("0.001") });
             alert("Transaction sent! Wait for confirmation.");
             await tx.wait();
