@@ -14,25 +14,25 @@
 <body class="p-8">
     <header class="max-w-4xl mx-auto flex justify-between items-center mb-10">
         <h1 class="text-3xl font-bold">Predict.arc</h1>
-        <button id="connectBtn" onclick="connectWallet()" class="bg-indigo-600 px-6 py-2 rounded-full">Connect Wallet</button>
+        <button id="connectBtn" onclick="connectWallet()" class="bg-indigo-600 px-6 py-2 rounded-full font-semibold">Connect Wallet</button>
     </header>
 
     <main class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
-        <!-- Place Bet -->
+        <!-- Place Bet Section -->
         <div class="glass-panel p-6 rounded-3xl">
             <h2 class="font-bold text-xl mb-4">Place Bet</h2>
-            <input id="marketId" type="number" placeholder="Market ID" class="w-full p-3 bg-slate-950 rounded-xl mb-3 border border-slate-700">
+            <input id="marketId" type="number" placeholder="Market ID" class="w-full p-3 bg-slate-950 rounded-xl mb-3 border border-slate-700 focus:outline-none">
             <div class="grid grid-cols-2 gap-3">
-                <button onclick="placeBet(true)" class="bg-emerald-600 py-3 rounded-xl font-bold">YES</button>
-                <button onclick="placeBet(false)" class="bg-rose-600 py-3 rounded-xl font-bold">NO</button>
+                <button onclick="placeBet(true)" class="bg-emerald-600 py-3 rounded-xl font-bold hover:bg-emerald-700 transition">YES</button>
+                <button onclick="placeBet(false)" class="bg-rose-600 py-3 rounded-xl font-bold hover:bg-rose-700 transition">NO</button>
             </div>
         </div>
 
-        <!-- Create Market -->
+        <!-- Create Market Section -->
         <div class="glass-panel p-6 rounded-3xl">
             <h2 class="font-bold text-xl mb-4">Create Market</h2>
-            <input id="newQuestion" type="text" placeholder="Question?" class="w-full p-3 bg-slate-950 rounded-xl mb-3 border border-slate-700">
-            <button onclick="createMarket()" class="w-full bg-blue-600 py-3 rounded-xl font-bold">Create Market</button>
+            <input id="newQuestion" type="text" placeholder="Enter question here" class="w-full p-3 bg-slate-950 rounded-xl mb-3 border border-slate-700 focus:outline-none">
+            <button onclick="createMarket()" class="w-full bg-blue-600 py-3 rounded-xl font-bold hover:bg-blue-700 transition">Create Market</button>
         </div>
     </main>
 
@@ -44,49 +44,54 @@
         ];
 
         async function connectWallet() {
-            await window.ethereum.request({ method: 'eth_requestAccounts' });
-            document.getElementById('connectBtn').innerText = "Connected";
+            if (window.ethereum) {
+                await window.ethereum.request({ method: 'eth_requestAccounts' });
+                document.getElementById('connectBtn').innerText = "Connected";
+            } else {
+                alert("Please install MetaMask!");
+            }
         }
 
         async function placeBet(isYes) {
             const id = document.getElementById('marketId').value;
-            if(!id) return alert("Enter Market ID");
-            
+            if(!id) return alert("Please enter a valid Market ID");
+
             const provider = new ethers.providers.Web3Provider(window.ethereum);
             const signer = provider.getSigner();
             const contract = new ethers.Contract(contractAddress, abi, signer);
-            
+
             try {
-                // এখানে Boolean(isYes) ব্যবহার করা জরুরি
-                const tx = await contract.bet(parseInt(id), Boolean(isYes), {
-                    value: ethers.utils.parseEther("0.001"), // ১০০০ গুই বা ০.০০১ এথ বেট ভ্যালু
+                const tx = await contract.bet(parseInt(id), isYes, {
+                    value: ethers.utils.parseEther("0.001"),
                     gasLimit: 300000
                 });
-                alert("Transaction submitted!");
+                alert("Transaction submitted. Please wait for confirmation.");
                 await tx.wait();
-                alert("Bet confirmed!");
+                alert("Bet confirmed successfully!");
             } catch(e) {
                 console.error(e);
-                alert("Error: " + (e.data?.message || e.message));
+                alert("Transaction failed: " + (e.reason || e.message));
             }
         }
 
         async function createMarket() {
             const question = document.getElementById('newQuestion').value;
+            if(!question) return alert("Please enter a question");
+
             const provider = new ethers.providers.Web3Provider(window.ethereum);
             const signer = provider.getSigner();
             const contract = new ethers.Contract(contractAddress, abi, signer);
-            
+
             try {
                 const tx = await contract.createMarket(question);
+                alert("Transaction submitted. Please wait for confirmation.");
                 await tx.wait();
-                alert("Market created!");
+                alert("Market created successfully!");
             } catch(e) {
+                console.error(e);
                 alert("Error: " + e.message);
             }
         }
     </script>
-</body>
-</html>
 </body>
 </html>
