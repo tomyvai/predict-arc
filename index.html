@@ -9,16 +9,119 @@
     <script src="https://unpkg.com/@walletconnect/web3-provider@1.8.0/dist/umd/index.min.js"></script>
     
     <style>
-        body { font-family: 'Segoe UI', sans-serif; max-width: 600px; margin: 50px auto; padding: 20px; background-color: #f0f2f5; }
-        .card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        h1 { text-align: center; color: #333; }
-        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.3s; }
-        .btn-connect { background-color: #6c5ce7; }
-        .btn-create { background-color: #0984e3; }
-        .btn-yes { background-color: #00b894; width: 48%; }
-        .btn-no { background-color: #d63031; width: 48%; }
-        .bet-buttons { display: flex; justify-content: space-between; }
+       <style>
+    /* মডার্ন ফন্ট এবং ব্যাকগ্রাউন্ড */
+    body { 
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+        max-width: 500px; 
+        margin: 40px auto; 
+        padding: 20px; 
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: 100vh;
+    }
+
+    /* কার্ড স্টাইল */
+    .card { 
+        background: #ffffff; 
+        padding: 25px; 
+        border-radius: 20px; 
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
+        margin-bottom: 20px; 
+        border: 1px solid rgba(255,255,255,0.3);
+    }
+
+    h1, h3 { color: #2d3436; text-align: center; }
+
+    /* ইনপুট ফিল্ড */
+    input { 
+        width: 100%; 
+        padding: 14px; 
+        margin: 10px 0; 
+        border: 2px solid #edf2f7; 
+        border-radius: 12px; 
+        box-sizing: border-box; 
+        font-size: 16px;
+        transition: 0.3s;
+    }
+    input:focus { border-color: #6c5ce7; outline: none; }
+
+    /* বাটন ডিজাইন */
+    button { 
+        width: 100%; 
+        padding: 14px; 
+        border: none; 
+        border-radius: 12px; 
+        color: white; 
+        font-weight: 600; 
+        cursor: pointer; 
+        margin-top: 10px; 
+        transition: 0.3s transform; 
+    }
+    button:active { transform: scale(0.98); }
+    
+    .btn-connect { background: #6c5ce7; }
+    .btn-create { background: #0984e3; }
+    
+    .bet-buttons { display: flex; gap: 10px; margin-top: 10px; }
+    .btn-yes { background: #00b894; flex: 1; }
+    .btn-no { background: #d63031; flex: 1; }
+</style><style>
+    /* মডার্ন ফন্ট এবং ব্যাকগ্রাউন্ড */
+    body { 
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+        max-width: 500px; 
+        margin: 40px auto; 
+        padding: 20px; 
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: 100vh;
+    }
+
+    /* কার্ড স্টাইল */
+    .card { 
+        background: #ffffff; 
+        padding: 25px; 
+        border-radius: 20px; 
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
+        margin-bottom: 20px; 
+        border: 1px solid rgba(255,255,255,0.3);
+    }
+
+    h1, h3 { color: #2d3436; text-align: center; }
+
+    /* ইনপুট ফিল্ড */
+    input { 
+        width: 100%; 
+        padding: 14px; 
+        margin: 10px 0; 
+        border: 2px solid #edf2f7; 
+        border-radius: 12px; 
+        box-sizing: border-box; 
+        font-size: 16px;
+        transition: 0.3s;
+    }
+    input:focus { border-color: #6c5ce7; outline: none; }
+
+    /* বাটন ডিজাইন */
+    button { 
+        width: 100%; 
+        padding: 14px; 
+        border: none; 
+        border-radius: 12px; 
+        color: white; 
+        font-weight: 600; 
+        cursor: pointer; 
+        margin-top: 10px; 
+        transition: 0.3s transform; 
+    }
+    button:active { transform: scale(0.98); }
+    
+    .btn-connect { background: #6c5ce7; }
+    .btn-create { background: #0984e3; }
+    
+    .bet-buttons { display: flex; gap: 10px; margin-top: 10px; }
+    .btn-yes { background: #00b894; flex: 1; }
+    .btn-no { background: #d63031; flex: 1; }
+</style>
     </style>
 </head>
 <body>
