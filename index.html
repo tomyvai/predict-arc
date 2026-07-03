@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <title>Predict Arc</title>
-    <!-- লাইব্রেরি লোড -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
     <style>
         :root { --bg: #0d1117; --card-bg: #161b22; --accent: #58a6ff; }
@@ -13,6 +12,9 @@
         .market-card { background: var(--card-bg); border: 1px solid #30363d; border-radius: 12px; padding: 20px; margin-bottom: 20px; }
         .btn-yes { background: #238636; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; }
         .btn-no { background: #da3633; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; }
+        #historySection { border: 1px solid var(--accent); }
+        ul { list-style: none; padding: 0; }
+        li { padding: 8px; border-bottom: 1px solid #30363d; font-size: 0.9em; }
     </style>
 </head>
 <body>
@@ -55,6 +57,14 @@
         <button class="btn-yes" onclick="bet(3, true)">YES</button>
         <button class="btn-no" onclick="bet(3, false)">NO</button>
     </div>
+
+    <!-- Bet History Section -->
+    <div class="market-card" id="historySection">
+        <h3>Your Bet History</h3>
+        <ul id="historyList">
+            <li>No bets placed yet.</li>
+        </ul>
+    </div>
 </div>
 
 <script>
@@ -64,39 +74,36 @@
     let signer;
 
     async function connectWallet() {
-        if (typeof window.ethereum === 'undefined') {
-            return alert("MetaMask is not installed!");
-        }
+        if (typeof window.ethereum === 'undefined') return alert("MetaMask not found!");
         try {
             await window.ethereum.request({ method: 'eth_requestAccounts' });
             const provider = new ethers.providers.Web3Provider(window.ethereum);
             signer = provider.getSigner();
             document.getElementById("connectBtn").innerText = "Connected";
-        } catch (e) {
-            alert("Connection error: " + e.message);
-        }
+        } catch (e) { alert("Error: " + e.message); }
     }
 
     async function bet(id, pred) {
-        if (!signer) {
-            alert("Please connect wallet first!");
-            return;
-        }
+        if (!signer) return alert("Connect wallet first!");
         try {
             const contract = new ethers.Contract(contractAddress, abi, signer);
-            // সরাসরি বাজি ধরার ফাংশন
             const tx = await contract.bet(id, pred, { value: ethers.utils.parseEther("0.001") });
-            alert("Transaction sent! Wait for confirmation...");
+            
+            alert("Transaction sent!");
             await tx.wait();
+            
+            // History Update
+            const historyList = document.getElementById("historyList");
+            if (document.querySelector('#historyList li').innerText === "No bets placed yet.") {
+                historyList.innerHTML = "";
+            }
+            const li = document.createElement("li");
+            li.innerText = `Market ID: ${id} | Prediction: ${pred ? "YES" : "NO"} | Status: Success`;
+            historyList.appendChild(li);
+            
             alert("Bet Successful!");
-        } catch (e) {
-            console.error(e);
-            alert("Bet failed: " + e.message);
-        }
+        } catch (e) { alert("Bet failed: " + e.message); }
     }
-</script>
-</body>
-</html>
 </script>
 </body>
 </html>
