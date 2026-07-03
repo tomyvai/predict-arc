@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <title>Predict Arc</title>
-    <!-- সরাসরি CDN থেকে লোড করুন -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
     <style>
         :root { --bg: #0d1117; --card-bg: #161b22; --accent: #58a6ff; }
@@ -27,11 +26,34 @@
         <button id="connectBtn" onclick="connectWallet()" style="padding:10px 20px; cursor:pointer;">Connect Wallet</button>
     </div>
 
+    <!-- মার্কেট আইডি ০ -->
     <div class="market-card">
         <h3>Will ETH price go up today?</h3>
         <p>Market ID: 0</p>
         <button class="btn-yes" onclick="bet(0, true)">YES</button>
         <button class="btn-no" onclick="bet(0, false)">NO</button>
+    </div>
+
+    <!-- নতুন ৩টি মার্কেট -->
+    <div class="market-card">
+        <h3>Will it rain in Dhaka tomorrow?</h3>
+        <p>Market ID: 1</p>
+        <button class="btn-yes" onclick="bet(1, true)">YES</button>
+        <button class="btn-no" onclick="bet(1, false)">NO</button>
+    </div>
+
+    <div class="market-card">
+        <h3>Will Bitcoin cross $70k this week?</h3>
+        <p>Market ID: 2</p>
+        <button class="btn-yes" onclick="bet(2, true)">YES</button>
+        <button class="btn-no" onclick="bet(2, false)">NO</button>
+    </div>
+
+    <div class="market-card">
+        <h3>Will the local team win the match?</h3>
+        <p>Market ID: 3</p>
+        <button class="btn-yes" onclick="bet(3, true)">YES</button>
+        <button class="btn-no" onclick="bet(3, false)">NO</button>
     </div>
 </div>
 
@@ -46,10 +68,8 @@
             alert("MetaMask is not installed!");
             return;
         }
-
         try {
             await window.ethereum.request({ method: 'eth_requestAccounts' });
-            // সরাসরি ethers ব্যবহার করছি
             const provider = new ethers.providers.Web3Provider(window.ethereum);
             signer = provider.getSigner();
             document.getElementById("connectBtn").innerText = "Connected";
@@ -63,7 +83,6 @@
             alert("Please connect your wallet first!");
             return;
         }
-        
         try {
             const contract = new ethers.Contract(contractAddress, abi, signer);
             const tx = await contract.bet(id, pred, { value: ethers.utils.parseEther("0.001") });
