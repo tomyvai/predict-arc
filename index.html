@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Predict Arc</title>
+    <!-- Ethers.js লাইব্রেরিটি সবার আগে লোড হতে হবে -->
     <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"></script>
     <style>
         :root { --bg: #0d1117; --card-bg: #161b22; --accent: #58a6ff; }
@@ -18,23 +19,16 @@
 
 <div class="sidebar">
     <h2 style="color: var(--accent);">Predict Arc</h2>
-    <p>Place your predictions</p>
 </div>
 
 <div class="main">
-    <div style="display:flex; justify-content:space-between; align-items:center;">
-        <h1>Active Markets</h1>
-        <button onclick="connectWallet()" id="connectBtn" style="padding:10px 20px; cursor:pointer;">Connect Wallet</button>
-    </div>
+    <h1>Active Markets</h1>
+    <button onclick="connectWallet()" id="connectBtn" style="padding:10px 20px; cursor:pointer;">Connect Wallet</button>
 
-    <!-- মার্কেট ১ -->
     <div class="market-card">
         <h3>Will ETH price go up today?</h3>
-        <p>Market ID: 0</p>
-        <div style="display:flex; gap:10px;">
-            <button class="btn-yes" onclick="bet(0, true)">YES</button>
-            <button class="btn-no" onclick="bet(0, false)">NO</button>
-        </div>
+        <button class="btn-yes" onclick="bet(0, true)">YES</button>
+        <button class="btn-no" onclick="bet(0, false)">NO</button>
     </div>
 </div>
 
@@ -45,42 +39,38 @@
     let signer;
 
     async function connectWallet() {
-        if (!window.ethereum) return alert("Please install MetaMask!");
+        // ১. ethers লোড হয়েছে কি না চেক করুন
+        if (typeof ethers === 'undefined') {
+            return alert("Error: Ethers.js library not loaded! Check your internet connection.");
+        }
         
+        // ২. মেটামাস্ক আছে কি না চেক করুন
+        if (typeof window.ethereum === 'undefined') {
+            return alert("MetaMask is not installed!");
+        }
+
         try {
-            // ১. অ্যাকাউন্ট কানেক্ট করা
             await window.ethereum.request({ method: 'eth_requestAccounts' });
             const provider = new ethers.providers.Web3Provider(window.ethereum);
-            
-            // ২. নেটওয়ার্ক চেক করা (এটি জরুরি)
-            const network = await provider.getNetwork();
-            console.log("Current Chain ID:", network.chainId);
-            
             signer = provider.getSigner();
             document.getElementById("connectBtn").innerText = "Connected";
         } catch (error) {
             console.error(error);
-            alert("Connection Failed: " + error.message);
+            alert("Connection failed: " + error.message);
         }
     }
 
     async function bet(id, pred) {
         if (!signer) return alert("Please connect your wallet first!");
-        
         try {
             const contract = new ethers.Contract(contractAddress, abi, signer);
-            
-            // ৩. ট্রানজ্যাকশন সফল করার জন্য সঠিক পদ্ধতিতে ETH পাঠানো
-            const tx = await contract.bet(id, pred, { 
-                value: ethers.utils.parseEther("0.001") // এখানে আপনার বাজি ধরার অ্যামাউন্ট দিন
-            });
-            
-            alert("Transaction sent! Wait for confirmation.");
-            await tx.wait(); // ট্রানজ্যাকশন কনফার্ম হওয়া পর্যন্ত অপেক্ষা
-            alert("Bet Successful!");
+            // বাজি ধরার সময় গ্যাস ফি এবং ভ্যালু ঠিক আছে কি না নিশ্চিত করুন
+            const tx = await contract.bet(id, pred, { value: ethers.utils.parseEther("0.001") });
+            await tx.wait();
+            alert("Bet Success!");
         } catch (error) {
             console.error(error);
-            alert("Bet Failed: " + (error.data ? error.data.message : error.message));
+            alert("Bet Failed: " + error.message);
         }
     }
 </script>
