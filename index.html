@@ -3,24 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Predict.arc</title>
+    <title>Predict.arc | Premium Markets</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
     <style>
-        body { background: #0f172a; color: white; }
-        .glass { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); }
+        body { background: #050505; color: white; font-family: 'Inter', sans-serif; }
+        .glass-card { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); }
+        .btn-gradient { background: linear-gradient(90deg, #4f46e5, #7c3aed); }
     </style>
 </head>
-<body class="p-8">
-    <div class="max-w-6xl mx-auto">
-        <header class="flex justify-between items-center mb-10">
-            <h1 class="text-3xl font-bold">Predict.arc</h1>
-            <button id="connectBtn" onclick="connectWallet()" class="bg-indigo-600 px-6 py-2 rounded-lg font-bold">Connect Wallet</button>
+<body class="p-4 md:p-10">
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <header class="flex justify-between items-center mb-16">
+            <h1 class="text-3xl font-black tracking-tighter text-white">PREDICT<span class="text-indigo-500">.ARC</span></h1>
+            <button id="connectBtn" onclick="connectWallet()" class="btn-gradient px-6 py-2.5 rounded-xl font-bold hover:opacity-90 transition">Connect Wallet</button>
         </header>
 
-        <!-- ৪ কলামের গ্রিড লেআউট -->
+        <!-- Markets Grid (৪টি কলাম) -->
         <div id="questionContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <!-- মার্কেট কার্ডগুলো এখানে আসবে -->
+            <p class="col-span-full text-center text-slate-500">Please connect wallet to view markets...</p>
         </div>
     </div>
 
@@ -28,8 +30,7 @@
         const contractAddress = "0x459b226eE3192603260c9c94d78F5173BA040f2c";
         const abi = [
             {"inputs":[{"internalType":"uint256","name":"_marketId","type":"uint256"},{"internalType":"bool","name":"_prediction","type":"bool"}],"name":"bet","outputs":[],"stateMutability":"payable","type":"function"},
-            {"inputs":[{"internalType":"string","name":"_question","type":"string"}],"name":"createMarket","outputs":[],"stateMutability":"nonpayable","type":"function"},
-            {"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"markets","outputs":[{"internalType":"string","name":"question","type":"bool","name":"resolved","type":"bool","name":"outcome","type":"uint256","name":"totalYes","type":"uint256","name":"totalNo"}],"stateMutability":"view","type":"function"},
+            {"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"markets","outputs":[{"internalType":"string","name":"question","type":"string"},{"internalType":"bool","name":"resolved","type":"bool"},{"internalType":"bool","name":"outcome","type":"bool"},{"internalType":"uint256","name":"totalYes","type":"uint256"},{"internalType":"uint256","name":"totalNo","type":"uint256"}],"stateMutability":"view","type":"function"},
             {"inputs":[],"name":"getMarketCount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"}
         ];
 
@@ -38,67 +39,44 @@
                 await window.ethereum.request({ method: 'eth_requestAccounts' });
                 document.getElementById('connectBtn').innerText = "Connected";
                 loadQuestions();
-            }
+            } else { alert("MetaMask not found!"); }
         }
 
         async function loadQuestions() {
             const container = document.getElementById('questionContainer');
-            container.innerHTML = ""; // ডাটা লোড হওয়ার আগে কন্টেইনার একদম ক্লিয়ার করে দিচ্ছি
+            container.innerHTML = "";
+            const provider = new ethers.providers.Web3Provider(window.ethereum);
+            const contract = new ethers.Contract(contractAddress, abi, provider);
+            const count = await contract.getMarketCount();
             
+            for(let i = 0; i < count.toNumber(); i++) {
+                const data = await contract.markets(i);
+                container.innerHTML += `
+                    <div class="glass-card p-6 rounded-2xl border border-white/10 hover:border-indigo-500 transition-all">
+                        <span class="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">Market ID: ${i}</span>
+                        <h3 class="text-lg font-bold mt-2 mb-6 h-16">${data.question}</h3>
+                        <div class="flex justify-between text-sm mb-6 text-slate-400">
+                            <span>YES: ${data.totalYes}</span>
+                            <span>NO: ${data.totalNo}</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button onclick="bet(${i}, true)" class="bg-emerald-500/10 text-emerald-500 py-2 rounded-lg font-bold hover:bg-emerald-500 hover:text-white transition">YES</button>
+                            <button onclick="bet(${i}, false)" class="bg-rose-500/10 text-rose-500 py-2 rounded-lg font-bold hover:bg-rose-500 hover:text-white transition">NO</button>
+                        </div>
+                    </div>`;
+            }
+        }
+
+        async function bet(id, pred) {
+            const signer = new ethers.providers.Web3Provider(window.ethereum).getSigner();
+            const contract = new ethers.Contract(contractAddress, abi, signer);
             try {
-                const provider = new ethers.providers.Web3Provider(window.ethereum);
-                const contract = new ethers.Contract(contractAddress, abi, provider);
-                const count = await contract.getMarketCount();
-                
-                for(let i = 0; i < count.toNumber(); i++) {
-                    const data = await contract.markets(i);
-                    // কার্ড রেন্ডারিং
-                    container.innerHTML += `
-                        <div class="glass p-4 rounded-xl border border-indigo-500/30">
-                            <h3 class="font-bold mb-2">${data.question}</h3>
-                            <div class="text-sm text-slate-400">Yes: ${data.totalYes} | No: ${data.totalNo}</div>
-                        </div>`;
-                }
-            } catch(e) { console.error("Error loading:", e); }
+                const tx = await contract.bet(id, pred, { value: ethers.utils.parseEther("0.001") });
+                await tx.wait();
+                alert("Bet confirmed!");
+                loadQuestions();
+            } catch(e) { alert("Transaction Failed"); }
         }
     </script>
 </body>
 </html>
-async function loadQuestions() {
-    const container = document.getElementById('questionContainer');
-    container.innerHTML = ""; 
-    
-    try {
-        const provider = new ethers.providers.Web3Provider(window.ethereum);
-        const contract = new ethers.Contract(contractAddress, abi, provider);
-        const count = await contract.getMarketCount();
-        
-        for(let i = 0; i < count.toNumber(); i++) {
-            const data = await contract.markets(i);
-            
-            // কার্ডের ভেতরে বাটন যোগ করা হয়েছে
-            container.innerHTML += `
-                <div class="glass p-4 rounded-xl border border-indigo-500/30">
-                    <h3 class="font-bold mb-2">${data.question}</h3>
-                    <div class="text-sm text-slate-400 mb-4">Yes: ${data.totalYes} | No: ${data.totalNo}</div>
-                    <div class="flex gap-2">
-                        <button onclick="bet(${i}, true)" class="bg-emerald-600 hover:bg-emerald-700 text-xs px-3 py-1 rounded">YES</button>
-                        <button onclick="bet(${i}, false)" class="bg-rose-600 hover:bg-rose-700 text-xs px-3 py-1 rounded">NO</button>
-                    </div>
-                </div>`;
-        }
-    } catch(e) { console.error("Error loading:", e); }
-}
-
-// নতুন বেট ফাংশন
-async function bet(marketId, prediction) {
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const signer = provider.getSigner();
-    const contract = new ethers.Contract(contractAddress, abi, signer);
-    try {
-        const tx = await contract.bet(marketId, prediction, { value: ethers.utils.parseEther("0.001") });
-        await tx.wait();
-        alert("Bet Placed!");
-        loadQuestions();
-    } catch(e) { alert("Error: " + e.message); }
-}
