@@ -7,20 +7,30 @@
     <style>
         :root { --bg: #0d1117; --card-bg: #161b22; --accent: #58a6ff; }
         body { background: var(--bg); color: #c9d1d9; font-family: sans-serif; margin: 0; display: flex; }
-        .sidebar { width: 260px; height: 100vh; background: #010409; border-right: 1px solid #30363d; padding: 20px; }
+        .sidebar { width: 300px; height: 100vh; background: #010409; border-right: 1px solid #30363d; padding: 20px; overflow-y: auto; }
         .main { flex: 1; padding: 40px; }
         .market-card { background: var(--card-bg); border: 1px solid #30363d; border-radius: 12px; padding: 20px; margin-bottom: 20px; }
         .btn-yes { background: #238636; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; }
         .btn-no { background: #da3633; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; }
-        #historySection { border: 1px solid var(--accent); }
+        
+        /* Sidebar History Style */
+        .history-box { margin-top: 30px; font-size: 0.85em; }
         ul { list-style: none; padding: 0; }
-        li { padding: 8px; border-bottom: 1px solid #30363d; font-size: 0.9em; }
+        li { padding: 10px; border-bottom: 1px solid #30363d; color: #8b949e; }
     </style>
 </head>
 <body>
 
 <div class="sidebar">
     <h2 style="color: var(--accent);">Predict Arc</h2>
+    
+    <!-- Bet History এখন বাম পাশে -->
+    <div class="history-box">
+        <h3>Bet History</h3>
+        <ul id="historyList">
+            <li>No bets placed yet.</li>
+        </ul>
+    </div>
 </div>
 
 <div class="main">
@@ -57,14 +67,6 @@
         <button class="btn-yes" onclick="bet(3, true)">YES</button>
         <button class="btn-no" onclick="bet(3, false)">NO</button>
     </div>
-
-    <!-- Bet History Section -->
-    <div class="market-card" id="historySection">
-        <h3>Your Bet History</h3>
-        <ul id="historyList">
-            <li>No bets placed yet.</li>
-        </ul>
-    </div>
 </div>
 
 <script>
@@ -92,13 +94,13 @@
             alert("Transaction sent!");
             await tx.wait();
             
-            // History Update
+            // Sidebar-এ আপডেট
             const historyList = document.getElementById("historyList");
             if (document.querySelector('#historyList li').innerText === "No bets placed yet.") {
                 historyList.innerHTML = "";
             }
             const li = document.createElement("li");
-            li.innerText = `Market ID: ${id} | Prediction: ${pred ? "YES" : "NO"} | Status: Success`;
+            li.innerText = `ID: ${id} | ${pred ? "YES" : "NO"} | Confirmed`;
             historyList.appendChild(li);
             
             alert("Bet Successful!");
