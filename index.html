@@ -18,10 +18,21 @@
     </header>
 
     <main class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
+        <!-- Display Questions -->
+        <div class="glass-panel p-6 rounded-3xl md:col-span-2">
+            <h2 class="font-bold text-xl mb-4">Available Questions</h2>
+            <div id="questionList" class="space-y-2 text-sm text-slate-300">
+                <p>ID 0: Will the price of Bitcoin (BTC) increase in the next 24 hours?</p>
+                <p>ID 1: Will the price of Ethereum (ETH) exceed $3,000 by the end of this week?</p>
+                <p>ID 2: Will the global crypto market cap increase over the next month?</p>
+                <p>ID 3: Will Bitcoin reach a new all-time high (ATH) this year?</p>
+            </div>
+        </div>
+
         <!-- Place Bet Section -->
         <div class="glass-panel p-6 rounded-3xl">
             <h2 class="font-bold text-xl mb-4">Place Bet</h2>
-            <input id="marketId" type="number" placeholder="Market ID" class="w-full p-3 bg-slate-950 rounded-xl mb-3 border border-slate-700 focus:outline-none">
+            <input id="marketId" type="number" placeholder="Enter Market ID (0-3)" class="w-full p-3 bg-slate-950 rounded-xl mb-3 border border-slate-700 focus:outline-none">
             <div class="grid grid-cols-2 gap-3">
                 <button onclick="placeBet(true)" class="bg-emerald-600 py-3 rounded-xl font-bold hover:bg-emerald-700 transition">YES</button>
                 <button onclick="placeBet(false)" class="bg-rose-600 py-3 rounded-xl font-bold hover:bg-rose-700 transition">NO</button>
@@ -30,8 +41,8 @@
 
         <!-- Create Market Section -->
         <div class="glass-panel p-6 rounded-3xl">
-            <h2 class="font-bold text-xl mb-4">Create Market</h2>
-            <input id="newQuestion" type="text" placeholder="Enter question here" class="w-full p-3 bg-slate-950 rounded-xl mb-3 border border-slate-700 focus:outline-none">
+            <h2 class="font-bold text-xl mb-4">Create New Market</h2>
+            <input id="newQuestion" type="text" placeholder="Enter custom question" class="w-full p-3 bg-slate-950 rounded-xl mb-3 border border-slate-700 focus:outline-none">
             <button onclick="createMarket()" class="w-full bg-blue-600 py-3 rounded-xl font-bold hover:bg-blue-700 transition">Create Market</button>
         </div>
     </main>
@@ -65,7 +76,7 @@
                     value: ethers.utils.parseEther("0.001"),
                     gasLimit: 300000
                 });
-                alert("Transaction submitted. Please wait for confirmation.");
+                alert("Transaction submitted. Please wait...");
                 await tx.wait();
                 alert("Bet confirmed successfully!");
             } catch(e) {
@@ -84,7 +95,7 @@
 
             try {
                 const tx = await contract.createMarket(question);
-                alert("Transaction submitted. Please wait for confirmation.");
+                alert("Transaction submitted. Please wait...");
                 await tx.wait();
                 alert("Market created successfully!");
             } catch(e) {
