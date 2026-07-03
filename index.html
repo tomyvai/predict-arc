@@ -9,119 +9,26 @@
     <script src="https://unpkg.com/@walletconnect/web3-provider@1.8.0/dist/umd/index.min.js"></script>
     
     <style>
-       <style>
-    /* মডার্ন ফন্ট এবং ব্যাকগ্রাউন্ড */
-    body { 
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-        max-width: 500px; 
-        margin: 40px auto; 
-        padding: 20px; 
-        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-        min-height: 100vh;
-    }
-
-    /* কার্ড স্টাইল */
-    .card { 
-        background: #ffffff; 
-        padding: 25px; 
-        border-radius: 20px; 
-        box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
-        margin-bottom: 20px; 
-        border: 1px solid rgba(255,255,255,0.3);
-    }
-
-    h1, h3 { color: #2d3436; text-align: center; }
-
-    /* ইনপুট ফিল্ড */
-    input { 
-        width: 100%; 
-        padding: 14px; 
-        margin: 10px 0; 
-        border: 2px solid #edf2f7; 
-        border-radius: 12px; 
-        box-sizing: border-box; 
-        font-size: 16px;
-        transition: 0.3s;
-    }
-    input:focus { border-color: #6c5ce7; outline: none; }
-
-    /* বাটন ডিজাইন */
-    button { 
-        width: 100%; 
-        padding: 14px; 
-        border: none; 
-        border-radius: 12px; 
-        color: white; 
-        font-weight: 600; 
-        cursor: pointer; 
-        margin-top: 10px; 
-        transition: 0.3s transform; 
-    }
-    button:active { transform: scale(0.98); }
-    
-    .btn-connect { background: #6c5ce7; }
-    .btn-create { background: #0984e3; }
-    
-    .bet-buttons { display: flex; gap: 10px; margin-top: 10px; }
-    .btn-yes { background: #00b894; flex: 1; }
-    .btn-no { background: #d63031; flex: 1; }
-</style><style>
-    /* মডার্ন ফন্ট এবং ব্যাকগ্রাউন্ড */
-    body { 
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-        max-width: 500px; 
-        margin: 40px auto; 
-        padding: 20px; 
-        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-        min-height: 100vh;
-    }
-
-    /* কার্ড স্টাইল */
-    .card { 
-        background: #ffffff; 
-        padding: 25px; 
-        border-radius: 20px; 
-        box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
-        margin-bottom: 20px; 
-        border: 1px solid rgba(255,255,255,0.3);
-    }
-
-    h1, h3 { color: #2d3436; text-align: center; }
-
-    /* ইনপুট ফিল্ড */
-    input { 
-        width: 100%; 
-        padding: 14px; 
-        margin: 10px 0; 
-        border: 2px solid #edf2f7; 
-        border-radius: 12px; 
-        box-sizing: border-box; 
-        font-size: 16px;
-        transition: 0.3s;
-    }
-    input:focus { border-color: #6c5ce7; outline: none; }
-
-    /* বাটন ডিজাইন */
-    button { 
-        width: 100%; 
-        padding: 14px; 
-        border: none; 
-        border-radius: 12px; 
-        color: white; 
-        font-weight: 600; 
-        cursor: pointer; 
-        margin-top: 10px; 
-        transition: 0.3s transform; 
-    }
-    button:active { transform: scale(0.98); }
-    
-    .btn-connect { background: #6c5ce7; }
-    .btn-create { background: #0984e3; }
-    
-    .bet-buttons { display: flex; gap: 10px; margin-top: 10px; }
-    .btn-yes { background: #00b894; flex: 1; }
-    .btn-no { background: #d63031; flex: 1; }
-</style>
+        /* মডার্ন ফন্ট এবং ব্যাকগ্রাউন্ড */
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 500px; margin: 40px auto; padding: 20px; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); min-height: 100vh; }
+        
+        /* কার্ড স্টাইল */
+        .card { background: #ffffff; padding: 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.3); }
+        h1, h3 { color: #2d3436; text-align: center; }
+        
+        /* ইনপুট ফিল্ড */
+        input { width: 100%; padding: 14px; margin: 10px 0; border: 2px solid #edf2f7; border-radius: 12px; box-sizing: border-box; font-size: 16px; transition: 0.3s; }
+        input:focus { border-color: #6c5ce7; outline: none; }
+        
+        /* বাটন ডিজাইন */
+        button { width: 100%; padding: 14px; border: none; border-radius: 12px; color: white; font-weight: 600; cursor: pointer; margin-top: 10px; transition: 0.3s transform; }
+        button:active { transform: scale(0.98); }
+        
+        .btn-connect { background: #6c5ce7; }
+        .btn-create { background: #0984e3; }
+        .bet-buttons { display: flex; gap: 10px; margin-top: 10px; }
+        .btn-yes { background: #00b894; flex: 1; }
+        .btn-no { background: #d63031; flex: 1; }
     </style>
 </head>
 <body>
@@ -150,21 +57,41 @@
 
     <script>
         const contractAddress = "0x459b226eE3192603260c9c94d78F5173BA040f2c";
-        const abi = [{"inputs":[],"stateMutability":"nonpayable","type":"constructor"},{"inputs":[{"internalType":"uint256","name":"_marketId","type":"uint256"},{"internalType":"bool","name":"_prediction","type":"bool"}],"name":"bet","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[{"internalType":"uint256","name":"_marketId","type":"uint256"}],"name":"claimWinnings","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"string","name":"_question","type":"string"}],"name":"createMarket","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"markets","outputs":[{"internalType":"string","name":"question","type":"string"},{"internalType":"bool","name":"resolved","type":"bool"},{"internalType":"bool","name":"outcome","type":"bool"},{"internalType":"uint256","name":"totalYes","type":"uint256"},{"internalType":"uint256","name":"totalNo","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"_marketId","type":"uint256"},{"internalType":"bool","name":"_outcome","type":"bool"}],"name":"resolveMarket","outputs":[],"stateMutability":"nonpayable","type":"function"}];
+        const abi = [
+            {"inputs":[],"stateMutability":"nonpayable","type":"constructor"},
+            {"inputs":[{"internalType":"uint256","name":"_marketId","type":"uint256"},{"internalType":"bool","name":"_prediction","type":"bool"}],"name":"bet","outputs":[],"stateMutability":"payable","type":"function"},
+            {"inputs":[{"internalType":"uint256","name":"_marketId","type":"uint256"}],"name":"claimWinnings","outputs":[],"stateMutability":"nonpayable","type":"function"},
+            {"inputs":[{"internalType":"string","name":"_question","type":"string"}],"name":"createMarket","outputs":[],"stateMutability":"nonpayable","type":"function"},
+            {"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"markets","outputs":[{"internalType":"string","name":"question","type":"string"},{"internalType":"bool","name":"resolved","type":"bool"},{"internalType":"bool","name":"outcome","type":"bool"},{"internalType":"uint256","name":"totalYes","type":"uint256"},{"internalType":"uint256","name":"totalNo","type":"uint256"}],"stateMutability":"view","type":"function"},
+            {"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},
+            {"inputs":[{"internalType":"uint256","name":"_marketId","type":"uint256"},{"internalType":"bool","name":"_outcome","type":"bool"}],"name":"resolveMarket","outputs":[],"stateMutability":"nonpayable","type":"function"}
+        ];
 
         // Web3Modal Setup
         const Web3Modal = window.Web3Modal.default;
-        const web3Modal = new Web3Modal({ cacheProvider: true });
+        const web3Modal = new Web3Modal({
+            cacheProvider: true,
+            providerOptions: {
+                walletconnect: {
+                    package: WalletConnectProvider,
+                    options: { infuraId: "27e484dcd9e3efcfd25a83a78777cdf1" }
+                }
+            }
+        });
 
         let signer;
 
         async function connectWallet() {
-            const instance = await web3Modal.connect();
-            const provider = new ethers.providers.Web3Provider(instance);
-            signer = provider.getSigner();
-            const address = await signer.getAddress();
-            document.getElementById("wallet-address").innerText = "Connected: " + address;
-            document.getElementById("btn-connect").innerText = "Connected";
+            try {
+                const instance = await web3Modal.connect();
+                const provider = new ethers.providers.Web3Provider(instance);
+                signer = provider.getSigner();
+                const address = await signer.getAddress();
+                document.getElementById("wallet-address").innerText = "Connected: " + address.substring(0,6) + "...";
+                document.getElementById("btn-connect").innerText = "Wallet Connected";
+            } catch (err) {
+                console.error("Connection failed:", err);
+            }
         }
 
         async function createMarket() {
