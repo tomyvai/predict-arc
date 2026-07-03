@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Predict.arc | Dashboard</title>
+    <title>Predict.arc</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
     <style>
@@ -11,47 +11,25 @@
         .glass { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); }
     </style>
 </head>
-<body class="p-4 md:p-8">
-    <div class="max-w-4xl mx-auto">
-        <!-- Header -->
-        <header class="flex flex-col md:flex-row justify-between items-center mb-10 gap-4">
-            <h1 class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-500">Predict.arc</h1>
-            <button id="connectBtn" onclick="connectWallet()" class="bg-indigo-600 hover:bg-indigo-700 px-8 py-3 rounded-full font-bold transition">Connect Wallet</button>
+<body class="p-8">
+    <div class="max-w-6xl mx-auto">
+        <header class="flex justify-between items-center mb-10">
+            <h1 class="text-3xl font-bold">Predict.arc</h1>
+            <button id="connectBtn" onclick="connectWallet()" class="bg-indigo-600 px-6 py-2 rounded-lg font-bold">Connect Wallet</button>
         </header>
 
-        <!-- Markets Grid -->
-        <h2 class="text-xl font-bold mb-4">Active Markets</h2>
-        <div id="questionContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
-            <p class="text-slate-400">Please connect your wallet to view markets...</p>
-        </div>
-
-        <!-- Actions -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div class="glass p-6 rounded-2xl">
-                <h2 class="font-bold text-lg mb-4">Place Your Bet</h2>
-                <input id="marketId" type="number" placeholder="Enter Market ID" class="w-full p-3 bg-slate-900 rounded-lg mb-4 border border-slate-700 focus:outline-none focus:border-indigo-500">
-                <div class="flex gap-3">
-                    <button onclick="placeBet(true)" class="bg-emerald-600 hover:bg-emerald-700 py-3 rounded-lg w-full font-bold transition">YES</button>
-                    <button onclick="placeBet(false)" class="bg-rose-600 hover:bg-rose-700 py-3 rounded-lg w-full font-bold transition">NO</button>
-                </div>
-            </div>
-
-            <div class="glass p-6 rounded-2xl">
-                <h2 class="font-bold text-lg mb-4">Create New Market</h2>
-                <input id="newQuestion" type="text" placeholder="What is your prediction?" class="w-full p-3 bg-slate-900 rounded-lg mb-4 border border-slate-700 focus:outline-none focus:border-blue-500">
-                <button onclick="createMarket()" class="w-full bg-blue-600 hover:bg-blue-700 py-3 rounded-lg font-bold transition">Create Market</button>
-            </div>
+        <!-- ৪ কলামের গ্রিড লেআউট -->
+        <div id="questionContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- মার্কেট কার্ডগুলো এখানে আসবে -->
         </div>
     </div>
 
     <script>
         const contractAddress = "0x459b226eE3192603260c9c94d78F5173BA040f2c";
         const abi = [
-            {"inputs":[],"stateMutability":"nonpayable","type":"constructor"},
             {"inputs":[{"internalType":"uint256","name":"_marketId","type":"uint256"},{"internalType":"bool","name":"_prediction","type":"bool"}],"name":"bet","outputs":[],"stateMutability":"payable","type":"function"},
-            {"inputs":[{"internalType":"uint256","name":"_marketId","type":"uint256"}],"name":"claimWinnings","outputs":[],"stateMutability":"nonpayable","type":"function"},
             {"inputs":[{"internalType":"string","name":"_question","type":"string"}],"name":"createMarket","outputs":[],"stateMutability":"nonpayable","type":"function"},
-            {"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"markets","outputs":[{"internalType":"string","name":"question","type":"string"},{"internalType":"bool","name":"resolved","type":"bool"},{"internalType":"bool","name":"outcome","type":"bool"},{"internalType":"uint256","name":"totalYes","type":"uint256"},{"internalType":"uint256","name":"totalNo","type":"uint256"}],"stateMutability":"view","type":"function"},
+            {"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"markets","outputs":[{"internalType":"string","name":"question","type":"bool","name":"resolved","type":"bool","name":"outcome","type":"uint256","name":"totalYes","type":"uint256","name":"totalNo"}],"stateMutability":"view","type":"function"},
             {"inputs":[],"name":"getMarketCount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"}
         ];
 
@@ -60,140 +38,29 @@
                 await window.ethereum.request({ method: 'eth_requestAccounts' });
                 document.getElementById('connectBtn').innerText = "Connected";
                 loadQuestions();
-            } else {
-                alert("Please install MetaMask!");
             }
         }
 
         async function loadQuestions() {
-            if (!window.ethereum) return;
+            const container = document.getElementById('questionContainer');
+            container.innerHTML = ""; // ডাটা লোড হওয়ার আগে কন্টেইনার একদম ক্লিয়ার করে দিচ্ছি
+            
             try {
                 const provider = new ethers.providers.Web3Provider(window.ethereum);
                 const contract = new ethers.Contract(contractAddress, abi, provider);
                 const count = await contract.getMarketCount();
-                const container = document.getElementById('questionContainer');
-                container.innerHTML = "";
                 
                 for(let i = 0; i < count.toNumber(); i++) {
                     const data = await contract.markets(i);
+                    // কার্ড রেন্ডারিং
                     container.innerHTML += `
-                        <div class="glass p-5 rounded-xl hover:border-indigo-500 transition">
-                            <span class="text-indigo-400 font-mono text-sm">ID: ${i}</span>
-                            <h3 class="text-lg font-semibold mt-1">${data.question}</h3>
-                            <div class="flex gap-4 mt-3 text-sm text-slate-400">
-                                <span>Yes: ${data.totalYes.toString()}</span>
-                                <span>No: ${data.totalNo.toString()}</span>
-                            </div>
+                        <div class="glass p-4 rounded-xl border border-indigo-500/30">
+                            <h3 class="font-bold mb-2">${data.question}</h3>
+                            <div class="text-sm text-slate-400">Yes: ${data.totalYes} | No: ${data.totalNo}</div>
                         </div>`;
                 }
-            } catch(e) { console.error(e); }
+            } catch(e) { console.error("Error loading:", e); }
         }
-
-        async function placeBet(isYes) {
-            const id = document.getElementById('marketId').value;
-            const provider = new ethers.providers.Web3Provider(window.ethereum);
-            const signer = provider.getSigner();
-            const contract = new ethers.Contract(contractAddress, abi, signer);
-            try {
-                const tx = await contract.bet(id, isYes, { value: ethers.utils.parseEther("0.আপনার জন্য পুরো কোডটি নিচে দিয়ে দিলাম। আমি কোডটিতে প্রয়োজনীয় সব ফাংশন এবং `loadQuestions` এ ছোট একটি ফিক্স করে দিয়েছি যাতে ডেটা আসার সাথে সাথেই স্ক্রিনে শো করে।
-
-এটি সম্পূর্ণ কপি করে আপনার `index.html` ফাইলে পেস্ট করে দিন:
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Predict.arc | Dashboard</title>
-    <script src="[https://cdn.tailwindcss.com](https://cdn.tailwindcss.com)"></script>
-    <script src="[https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js](https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js)"></script>
-    <style>
-        body { background: #0f172a; color: white; }
-        .glass { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); }
-    </style>
-</head>
-<body class="p-4 md:p-8">
-    <div class="max-w-4xl mx-auto">
-        <!-- Header -->
-        <header class="flex flex-col md:flex-row justify-between items-center mb-10 gap-4">
-            <h1 class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-500">Predict.arc</h1>
-            <button id="connectBtn" onclick="connectWallet()" class="bg-indigo-600 hover:bg-indigo-700 px-8 py-3 rounded-full font-bold transition">Connect Wallet</button>
-        </header>
-
-        <!-- Markets Grid -->
-        <h2 class="text-xl font-bold mb-4">Active Markets</h2>
-        <div id="questionContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
-            <p class="text-slate-400">Please connect your wallet to view markets...</p>
-        </div>
-
-        <!-- Actions -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div class="glass p-6 rounded-2xl">
-                <h2 class="font-bold text-lg mb-4">Place Your Bet</h2>
-                <input id="marketId" type="number" placeholder="Enter Market ID" class="w-full p-3 bg-slate-900 rounded-lg mb-4 border border-slate-700 focus:outline-none focus:border-indigo-500">
-                <div class="flex gap-3">
-                    <button onclick="placeBet(true)" class="bg-emerald-600 hover:bg-emerald-700 py-3 rounded-lg w-full font-bold transition">YES</button>
-                    <button onclick="placeBet(false)" class="bg-rose-600 hover:bg-rose-700 py-3 rounded-lg w-full font-bold transition">NO</button>
-                </div>
-            </div>
-
-            <div class="glass p-6 rounded-2xl">
-                <h2 class="font-bold text-lg mb-4">Create New Market</h2>
-                <input id="newQuestion" type="text" placeholder="What is your prediction?" class="w-full p-3 bg-slate-900 rounded-lg mb-4 border border-slate-700 focus:outline-none focus:border-blue-500">
-                <button onclick="createMarket()" class="w-full bg-blue-600 hover:bg-blue-700 py-3 rounded-lg font-bold transition">Create Market</button>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        const contractAddress = "0x459b226eE3192603260c9c94d78F5173BA040f2c";
-        const abi = [
-            {"inputs":[],"stateMutability":"nonpayable","type":"constructor"},
-            {"inputs":[{"internalType":"uint256","name":"_marketId","type":"uint256"},{"internalType":"bool","name":"_prediction","type":"bool"}],"name":"bet","outputs":[],"stateMutability":"payable","type":"function"},
-            {"inputs":[{"internalType":"uint256","name":"_marketId","type":"uint256"}],"name":"claimWinnings","outputs":[],"stateMutability":"nonpayable","type":"function"},
-            {"inputs":[{"internalType":"string","name":"_question","type":"string"}],"name":"createMarket","outputs":[],"stateMutability":"nonpayable","type":"function"},
-            {"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"markets","outputs":[{"internalType":"string","name":"question","type":"string"},{"internalType":"bool","name":"resolved","type":"bool"},{"internalType":"bool","name":"outcome","type":"bool"},{"internalType":"uint256","name":"totalYes","type":"uint256"},{"internalType":"uint256","name":"totalNo","type":"uint256"}],"stateMutability":"view","type":"function"},
-            {"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},
-            {"inputs":[{"internalType":"uint256","name":"_marketId","type":"uint256"},{"internalType":"bool","name":"_outcome","type":"bool"}],"name":"resolveMarket","outputs":[],"stateMutability":"nonpayable","type":"function"},
-            {"inputs":[],"name":"getMarketCount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"}
-        ];
-
-        async function connectWallet() {
-            if (window.ethereum) {
-                await window.ethereum.request({ method: 'eth_requestAccounts' });
-                document.getElementById('connectBtn').innerText = "Connected";
-                loadQuestions();
-            } else {
-                alert("Please install MetaMask!");
-            }
-        }
-
-        async function loadQuestions() {
-            if (!window.ethereum) return;
-            try {
-                const provider = new ethers.providers.Web3Provider(window.ethereum);
-                const contract = new ethers.Contract(contractAddress, abi, provider);
-                const count = await contract.getMarketCount();
-                const container = document.getElementById('questionContainer');
-                container.innerHTML = "";
-                
-                for(let i = 0; i < count; i++) {
-                    const data = await contract.markets(i);
-                    container.innerHTML += `
-                        <div class="glass p-5 rounded-xl hover:border-indigo-500 transition">
-                            <span class="text-indigo-400 font-mono text-sm">ID: ${i}</span>
-                            <h3 class="text-lg font-semibold mt-1">${data.question}</h3>
-                            <div class="flex gap-4 mt-3 text-sm text-slate-400">
-                                <span>Yes: ${data.totalYes.toString()}</span>
-                                <span>No: ${data.totalNo.toString()}</span>
-                            </div>
-                        </div>`;
-                }
-            } catch(e) { console.error(e); }
-        }
-
-        async function placeBet(isYes) {
-            const id = document.getElementById('marketId').value;
-            const provider = new ethers.providers.Web3Provider(window.ethereum);
-            const signer = provider.getSign
+    </script>
+</body>
+</html>
