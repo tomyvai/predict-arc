@@ -7,13 +7,11 @@
 <body>
     <h1>Prediction Market</h1>
     
-    <!-- মার্কেট তৈরি -->
     <input type="text" id="question" placeholder="প্রশ্ন লিখুন">
     <button onclick="createMarket()">Market তৈরি করুন</button>
 
     <hr>
 
-    <!-- বাজি ধরা -->
     <input type="number" id="marketId" placeholder="Market ID">
     <input type="number" id="betAmount" placeholder="ETH পরিমাণ">
     <button onclick="bet(true)">Yes বাজি</button>
@@ -21,82 +19,26 @@
 
     <script>
         const contractAddress = "0x459b226eE3192603260c9c94d78F5173BA040f2c";
-        const abi = [const contractAddress = "0x459b226eE3192603260c9c94d78F5173BA040f2c";
-
-const abi = [
-	{
-		"inputs": [],
-		"stateMutability": "nonpayable",
-		"type": "constructor"
-	},
-	{
-		"inputs": [
-			{ "internalType": "uint256", "name": "_marketId", "type": "uint256" },
-			{ "internalType": "bool", "name": "_prediction", "type": "bool" }
-		],
-		"name": "bet",
-		"outputs": [],
-		"stateMutability": "payable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{ "internalType": "uint256", "name": "_marketId", "type": "uint256" }
-		],
-		"name": "claimWinnings",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{ "internalType": "string", "name": "_question", "type": "string" }
-		],
-		"name": "createMarket",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{ "internalType": "uint256", "name": "", "type": "uint256" }
-		],
-		"name": "markets",
-		"outputs": [
-			{ "internalType": "string", "name": "question", "type": "string" },
-			{ "internalType": "bool", "name": "resolved", "type": "bool" },
-			{ "internalType": "bool", "name": "outcome", "type": "bool" },
-			{ "internalType": "uint256", "name": "totalYes", "type": "uint256" },
-			{ "internalType": "uint256", "name": "totalNo", "type": "uint256" }
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "owner",
-		"outputs": [
-			{ "internalType": "address", "name": "", "type": "address" }
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{ "internalType": "uint256", "name": "_marketId", "type": "uint256" },
-			{ "internalType": "bool", "name": "_outcome", "type": "bool" }
-		],
-		"name": "resolveMarket",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	}
-];
         
+        // সঠিক ABI ফরম্যাট
+        const abi = [
+            {"inputs":[],"stateMutability":"nonpayable","type":"constructor"},
+            {"inputs":[{"internalType":"uint256","name":"_marketId","type":"uint256"},{"internalType":"bool","name":"_prediction","type":"bool"}],"name":"bet","outputs":[],"stateMutability":"payable","type":"function"},
+            {"inputs":[{"internalType":"uint256","name":"_marketId","type":"uint256"}],"name":"claimWinnings","outputs":[],"stateMutability":"nonpayable","type":"function"},
+            {"inputs":[{"internalType":"string","name":"_question","type":"string"}],"name":"createMarket","outputs":[],"stateMutability":"nonpayable","type":"function"},
+            {"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"markets","outputs":[{"internalType":"string","name":"question","type":"string"},{"internalType":"bool","name":"resolved","type":"bool"},{"internalType":"bool","name":"outcome","type":"bool"},{"internalType":"uint256","name":"totalYes","type":"uint256"},{"internalType":"uint256","name":"totalNo","type":"uint256"}],"stateMutability":"view","type":"function"},
+            {"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},
+            {"inputs":[{"internalType":"uint256","name":"_marketId","type":"uint256"},{"internalType":"bool","name":"_outcome","type":"bool"}],"name":"resolveMarket","outputs":[],"stateMutability":"nonpayable","type":"function"}
+        ];
+
         async function connect() {
-            const provider = new ethers.providers.Web3Provider(window.ethereum);
-            await provider.send("eth_requestAccounts", []);
-            return provider.getSigner();
+            if (window.ethereum) {
+                const provider = new ethers.providers.Web3Provider(window.ethereum);
+                await provider.send("eth_requestAccounts", []);
+                return provider.getSigner();
+            } else {
+                alert("দয়া করে MetaMask ইনস্টল করুন!");
+            }
         }
 
         async function createMarket() {
