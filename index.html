@@ -2,107 +2,81 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Predict.arc | Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"></script>
     <style>
-        body { background: radial-gradient(circle at top right, #1e293b, #0f172a); color: #f8fafc; min-height: 100vh; }
-        .glass-panel { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        body { background: #0f172a; color: white; }
+        .glass { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); }
     </style>
 </head>
 <body class="p-8">
-    <header class="max-w-4xl mx-auto flex justify-between items-center mb-10">
-        <h1 class="text-3xl font-bold">Predict.arc</h1>
-        <button id="connectBtn" onclick="connectWallet()" class="bg-indigo-600 px-6 py-2 rounded-full font-semibold">Connect Wallet</button>
-    </header>
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold mb-8">Predict.arc</h1>
+        
+        <!-- প্রশ্নগুলো এখানে আলাদা বক্সে দেখাবে -->
+        <div id="questionContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+            <!-- Questions will be injected here -->
+        </div>
 
-    <main class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
-        <!-- Display Questions -->
-        <div class="glass-panel p-6 rounded-3xl md:col-span-2">
-            <h2 class="font-bold text-xl mb-4">Available Questions</h2>
-            <div id="questionList" class="space-y-2 text-sm text-slate-300">
-                <p>ID 0: Will the price of Bitcoin (BTC) increase in the next 24 hours?</p>
-                <p>ID 1: Will the price of Ethereum (ETH) exceed $3,000 by the end of this week?</p>
-                <p>ID 2: Will the global crypto market cap increase over the next month?</p>
-                <p>ID 3: Will Bitcoin reach a new all-time high (ATH) this year?</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="glass p-6 rounded-xl">
+                <h2 class="font-bold mb-4">Place Bet</h2>
+                <input id="marketId" type="number" placeholder="ID" class="w-full p-2 bg-slate-900 rounded mb-2">
+                <div class="flex gap-2">
+                    <button onclick="placeBet(true)" class="bg-emerald-600 px-4 py-2 rounded">YES</button>
+                    <button onclick="placeBet(false)" class="bg-rose-600 px-4 py-2 rounded">NO</button>
+                </div>
             </div>
         </div>
-
-        <!-- Place Bet Section -->
-        <div class="glass-panel p-6 rounded-3xl">
-            <h2 class="font-bold text-xl mb-4">Place Bet</h2>
-            <input id="marketId" type="number" placeholder="Enter Market ID (0-3)" class="w-full p-3 bg-slate-950 rounded-xl mb-3 border border-slate-700 focus:outline-none">
-            <div class="grid grid-cols-2 gap-3">
-                <button onclick="placeBet(true)" class="bg-emerald-600 py-3 rounded-xl font-bold hover:bg-emerald-700 transition">YES</button>
-                <button onclick="placeBet(false)" class="bg-rose-600 py-3 rounded-xl font-bold hover:bg-rose-700 transition">NO</button>
-            </div>
-        </div>
-
-        <!-- Create Market Section -->
-        <div class="glass-panel p-6 rounded-3xl">
-            <h2 class="font-bold text-xl mb-4">Create New Market</h2>
-            <input id="newQuestion" type="text" placeholder="Enter custom question" class="w-full p-3 bg-slate-950 rounded-xl mb-3 border border-slate-700 focus:outline-none">
-            <button onclick="createMarket()" class="w-full bg-blue-600 py-3 rounded-xl font-bold hover:bg-blue-700 transition">Create Market</button>
-        </div>
-    </main>
+    </div>
 
     <script>
         const contractAddress = "0xa144672B1DFc3348F0D938DE6496C031a5bcCA3D";
         const abi = [
-            "function bet(uint256 _marketId, bool _prediction) public payable",
-            "function createMarket(string memory _question) public"
+            "function bet(uint256, bool) public payable",
+            "function getMarketCount() public view returns (uint256)",
+            "function markets(uint256) public view returns (string memory)"
         ];
 
-        async function connectWallet() {
-            if (window.ethereum) {
-                await window.ethereum.request({ method: 'eth_requestAccounts' });
-                document.getElementById('connectBtn').innerText = "Connected";
-            } else {
-                alert("Please install MetaMask!");
+        async function loadQuestions() {
+            const provider = new ethers.providers.Web3Provider(window.ethereum);
+            const contract = new ethers.Contract(contractAddress, abi, provider);
+            const container = document.getElementById('questionContainer');
+            
+            const count = await contract.getMarketCount();
+            container.innerHTML = ""; 
+
+            for(let i = 0; i < count; i++) {
+                const q = await contract.markets(i);
+                container.innerHTML += `
+                    <div class="glass p-4 rounded-lg">
+                        <p class="text-xs text-slate-400">ID: ${i}</p>
+                        <p class="font-semibold">${q}</p>
+                    </div>`;
             }
         }
-
+        
+        // ট্রানজ্যাকশন এরর এড়াতে gasLimit বাড়ান
         async function placeBet(isYes) {
             const id = document.getElementById('marketId').value;
-            if(!id) return alert("Please enter a valid Market ID");
-
             const provider = new ethers.providers.Web3Provider(window.ethereum);
             const signer = provider.getSigner();
             const contract = new ethers.Contract(contractAddress, abi, signer);
-
+            
             try {
-                const tx = await contract.bet(parseInt(id), isYes, {
-                    value: ethers.utils.parseEther("0.001"),
-                    gasLimit: 300000
+                const tx = await contract.bet(id, isYes, { 
+                    value: ethers.utils.parseEther("0.001"), 
+                    gasLimit: 500000 
                 });
-                alert("Transaction submitted. Please wait...");
                 await tx.wait();
-                alert("Bet confirmed successfully!");
+                alert("Success!");
             } catch(e) {
-                console.error(e);
-                alert("Transaction failed: " + (e.reason || e.message));
+                alert("Trx Failed: " + e.message);
             }
         }
 
-        async function createMarket() {
-            const question = document.getElementById('newQuestion').value;
-            if(!question) return alert("Please enter a question");
-
-            const provider = new ethers.providers.Web3Provider(window.ethereum);
-            const signer = provider.getSigner();
-            const contract = new ethers.Contract(contractAddress, abi, signer);
-
-            try {
-                const tx = await contract.createMarket(question);
-                alert("Transaction submitted. Please wait...");
-                await tx.wait();
-                alert("Market created successfully!");
-            } catch(e) {
-                console.error(e);
-                alert("Error: " + e.message);
-            }
-        }
+        window.onload = loadQuestions;
     </script>
 </body>
 </html>
