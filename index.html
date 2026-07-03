@@ -1,81 +1,120 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Predict.arc | Premium Markets</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
-    <style>
-        body { background: #050505; color: white; font-family: 'Inter', sans-serif; }
-        .glass-card { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); }
-        .btn-gradient { background: linear-gradient(90deg, #4f46e5, #7c3aed); }
-    </style>
+    <title>Prediction Market DApp</title>
+    <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"></script>
 </head>
-<body class="p-4 md:p-10">
-    <div class="max-w-7xl mx-auto">
-        <!-- Header -->
-        <header class="flex justify-between items-center mb-16">
-            <h1 class="text-3xl font-black tracking-tighter text-white">PREDICT<span class="text-indigo-500">.ARC</span></h1>
-            <button id="connectBtn" onclick="connectWallet()" class="btn-gradient px-6 py-2.5 rounded-xl font-bold hover:opacity-90 transition">Connect Wallet</button>
-        </header>
+<body>
+    <h1>Prediction Market</h1>
+    
+    <!-- মার্কেট তৈরি -->
+    <input type="text" id="question" placeholder="প্রশ্ন লিখুন">
+    <button onclick="createMarket()">Market তৈরি করুন</button>
 
-        <!-- Markets Grid (৪টি কলাম) -->
-        <div id="questionContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <p class="col-span-full text-center text-slate-500">Please connect wallet to view markets...</p>
-        </div>
-    </div>
+    <hr>
+
+    <!-- বাজি ধরা -->
+    <input type="number" id="marketId" placeholder="Market ID">
+    <input type="number" id="betAmount" placeholder="ETH পরিমাণ">
+    <button onclick="bet(true)">Yes বাজি</button>
+    <button onclick="bet(false)">No বাজি</button>
 
     <script>
         const contractAddress = "0x459b226eE3192603260c9c94d78F5173BA040f2c";
-        const abi = [
-            {"inputs":[{"internalType":"uint256","name":"_marketId","type":"uint256"},{"internalType":"bool","name":"_prediction","type":"bool"}],"name":"bet","outputs":[],"stateMutability":"payable","type":"function"},
-            {"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"markets","outputs":[{"internalType":"string","name":"question","type":"string"},{"internalType":"bool","name":"resolved","type":"bool"},{"internalType":"bool","name":"outcome","type":"bool"},{"internalType":"uint256","name":"totalYes","type":"uint256"},{"internalType":"uint256","name":"totalNo","type":"uint256"}],"stateMutability":"view","type":"function"},
-            {"inputs":[],"name":"getMarketCount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"}
-        ];
+        const abi = [const contractAddress = "0x459b226eE3192603260c9c94d78F5173BA040f2c";
 
-        async function connectWallet() {
-            if (window.ethereum) {
-                await window.ethereum.request({ method: 'eth_requestAccounts' });
-                document.getElementById('connectBtn').innerText = "Connected";
-                loadQuestions();
-            } else { alert("MetaMask not found!"); }
-        }
-
-        async function loadQuestions() {
-            const container = document.getElementById('questionContainer');
-            container.innerHTML = "";
+const abi = [
+	{
+		"inputs": [],
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"inputs": [
+			{ "internalType": "uint256", "name": "_marketId", "type": "uint256" },
+			{ "internalType": "bool", "name": "_prediction", "type": "bool" }
+		],
+		"name": "bet",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{ "internalType": "uint256", "name": "_marketId", "type": "uint256" }
+		],
+		"name": "claimWinnings",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{ "internalType": "string", "name": "_question", "type": "string" }
+		],
+		"name": "createMarket",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{ "internalType": "uint256", "name": "", "type": "uint256" }
+		],
+		"name": "markets",
+		"outputs": [
+			{ "internalType": "string", "name": "question", "type": "string" },
+			{ "internalType": "bool", "name": "resolved", "type": "bool" },
+			{ "internalType": "bool", "name": "outcome", "type": "bool" },
+			{ "internalType": "uint256", "name": "totalYes", "type": "uint256" },
+			{ "internalType": "uint256", "name": "totalNo", "type": "uint256" }
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "owner",
+		"outputs": [
+			{ "internalType": "address", "name": "", "type": "address" }
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{ "internalType": "uint256", "name": "_marketId", "type": "uint256" },
+			{ "internalType": "bool", "name": "_outcome", "type": "bool" }
+		],
+		"name": "resolveMarket",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	}
+];
+        
+        async function connect() {
             const provider = new ethers.providers.Web3Provider(window.ethereum);
-            const contract = new ethers.Contract(contractAddress, abi, provider);
-            const count = await contract.getMarketCount();
-            
-            for(let i = 0; i < count.toNumber(); i++) {
-                const data = await contract.markets(i);
-                container.innerHTML += `
-                    <div class="glass-card p-6 rounded-2xl border border-white/10 hover:border-indigo-500 transition-all">
-                        <span class="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">Market ID: ${i}</span>
-                        <h3 class="text-lg font-bold mt-2 mb-6 h-16">${data.question}</h3>
-                        <div class="flex justify-between text-sm mb-6 text-slate-400">
-                            <span>YES: ${data.totalYes}</span>
-                            <span>NO: ${data.totalNo}</span>
-                        </div>
-                        <div class="grid grid-cols-2 gap-2">
-                            <button onclick="bet(${i}, true)" class="bg-emerald-500/10 text-emerald-500 py-2 rounded-lg font-bold hover:bg-emerald-500 hover:text-white transition">YES</button>
-                            <button onclick="bet(${i}, false)" class="bg-rose-500/10 text-rose-500 py-2 rounded-lg font-bold hover:bg-rose-500 hover:text-white transition">NO</button>
-                        </div>
-                    </div>`;
-            }
+            await provider.send("eth_requestAccounts", []);
+            return provider.getSigner();
         }
 
-        async function bet(id, pred) {
-            const signer = new ethers.providers.Web3Provider(window.ethereum).getSigner();
+        async function createMarket() {
+            const signer = await connect();
             const contract = new ethers.Contract(contractAddress, abi, signer);
-            try {
-                const tx = await contract.bet(id, pred, { value: ethers.utils.parseEther("0.001") });
-                await tx.wait();
-                alert("Bet confirmed!");
-                loadQuestions();
-            } catch(e) { alert("Transaction Failed"); }
+            const question = document.getElementById("question").value;
+            await contract.createMarket(question);
+        }
+
+        async function bet(prediction) {
+            const signer = await connect();
+            const contract = new ethers.Contract(contractAddress, abi, signer);
+            const id = document.getElementById("marketId").value;
+            const amount = document.getElementById("betAmount").value;
+            
+            await contract.bet(id, prediction, {
+                value: ethers.utils.parseEther(amount)
+            });
         }
     </script>
 </body>
