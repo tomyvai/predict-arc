@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Predict.arc | Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- নতুন এবং আরও নির্ভরযোগ্য CDN লিঙ্ক -->
+    <!-- ethers v5.7.2 লোড করার জন্য এটি সবচেয়ে নিশ্চিত লিঙ্ক -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
     <style>
         body { background: #0f172a; color: white; }
@@ -50,18 +50,26 @@
             "function markets(uint256) public view returns (string question, bool resolved, bool outcome, uint256 totalYes, uint256 totalNo)"
         ];
 
+        // ethers লোড হয়েছে কি না চেক করা
+        function checkEthers() {
+            if (typeof ethers === 'undefined') {
+                console.error("Ethers.js is not loaded yet!");
+                setTimeout(checkEthers, 500); // ৫০ মিলি সেকেন্ড পরে আবার চেক করবে
+                return false;
+            }
+            return true;
+        }
+
         async function connectWallet() {
             if (window.ethereum) {
-                try {
-                    await window.ethereum.request({ method: 'eth_requestAccounts' });
-                    document.getElementById('connectBtn').innerText = "Connected";
-                    loadQuestions();
-                } catch (err) { alert("User denied account access"); }
+                await window.ethereum.request({ method: 'eth_requestAccounts' });
+                document.getElementById('connectBtn').innerText = "Connected";
+                loadQuestions();
             } else { alert("Please install MetaMask!"); }
         }
 
         async function loadQuestions() {
-            if (!window.ethereum) return;
+            if (!checkEthers() || !window.ethereum) return;
             try {
                 const provider = new ethers.providers.Web3Provider(window.ethereum);
                 const contract = new ethers.Contract(contractAddress, abi, provider);
@@ -89,6 +97,7 @@
                 const tx = await contract.bet(id, isYes, { value: ethers.utils.parseEther("0.001") });
                 await tx.wait();
                 alert("Bet Successful!");
+                loadQuestions();
             } catch(e) { alert("Error: " + e.message); }
         }
 
@@ -106,12 +115,7 @@
             } catch(e) { alert("Error: " + e.message); }
         }
 
-        window.onload = () => {
-            if (window.ethereum && window.ethereum.selectedAddress) {
-                document.getElementById('connectBtn').innerText = "Connected";
-            }
-            loadQuestions();
-        };
+        window.onload = loadQuestions;
     </script>
 </body>
 </html>
