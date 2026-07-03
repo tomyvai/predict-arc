@@ -3,9 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <title>Futura Markets</title>
+    <!-- Ethers.js লাইব্রেরি -->
     <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"></script>
     <style>
-        body { background-color: #0d1117; color: #c9d1d9; font-family: -apple-system, sans-serif; margin: 0; padding: 20px; }
+        /* ডিজাইন: Futura Markets এর মতো গাঢ় থিম */
+        body { background-color: #0d1117; color: #c9d1d9; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; }
         .container { max-width: 800px; margin: auto; }
         
         /* Header */
@@ -39,13 +41,13 @@
     <!-- Create Market -->
     <div class="card">
         <h3>Create New Market</h3>
-        <input type="text" id="question" placeholder="Enter question here...">
+        <input type="text" id="question" placeholder="প্রশ্ন লিখুন...">
         <button class="btn-create" onclick="createMarket()">Create Market</button>
     </div>
 
     <!-- Market List -->
     <div class="card">
-        <h3>Will the price of ETH go up today?</h3>
+        <h3>ETH কি আজ বাড়বে?</h3>
         <p>Market ID: 0</p>
         <div class="btn-row">
             <button class="btn-yes" onclick="bet(0, true)">YES</button>
@@ -55,12 +57,13 @@
 </div>
 
 <script>
+    // আপনার স্মার্ট কন্ট্রাক্ট অ্যাড্রেস এবং ABI
     const contractAddress = "0x459b226eE3192603260c9c94d78F5173BA040f2c";
     const abi = [{"inputs":[],"stateMutability":"nonpayable","type":"constructor"},{"inputs":[{"internalType":"uint256","name":"_marketId","type":"uint256"},{"internalType":"bool","name":"_prediction","type":"bool"}],"name":"bet","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[{"internalType":"uint256","name":"_marketId","type":"uint256"}],"name":"claimWinnings","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"string","name":"_question","type":"string"}],"name":"createMarket","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"markets","outputs":[{"internalType":"string","name":"question","type":"string"},{"internalType":"bool","name":"resolved","type":"bool"},{"internalType":"bool","name":"outcome","type":"bool"},{"internalType":"uint256","name":"totalYes","type":"uint256"},{"internalType":"uint256","name":"totalNo","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"_marketId","type":"uint256"},{"internalType":"bool","name":"_outcome","type":"bool"}],"name":"resolveMarket","outputs":[],"stateMutability":"nonpayable","type":"function"}];
 
     let signer;
 
-    // ওয়ালেট কানেক্ট লজিক - শক্তিশালী করা হয়েছে
+    // ১. ওয়ালেট কানেক্ট ফাংশন
     async function connectWallet() {
         if (!window.ethereum) return alert("MetaMask ইনস্টল করুন!");
         try {
@@ -75,6 +78,7 @@
         }
     }
 
+    // ২. মার্কেট তৈরির ফাংশন
     async function createMarket() {
         if (!signer) return connectWallet();
         const contract = new ethers.Contract(contractAddress, abi, signer);
@@ -82,6 +86,7 @@
         await contract.createMarket(q);
     }
 
+    // ৩. বাজি ধরার ফাংশন
     async function bet(id, pred) {
         if (!signer) return connectWallet();
         const contract = new ethers.Contract(contractAddress, abi, signer);
