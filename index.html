@@ -2,40 +2,48 @@
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
-    <title>Futura Markets</title>
+    <title>Futura Markets Dashboard</title>
     <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"></script>
     <style>
-        body { background-color: #0d1117; color: #c9d1d9; font-family: sans-serif; margin: 0; padding: 20px; }
-        .container { max-width: 800px; margin: auto; }
-        .header { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; border-bottom: 1px solid #30363d; }
-        .card { background: #161b22; border: 1px solid #30363d; border-radius: 12px; padding: 20px; margin-top: 20px; }
-        input { width: 100%; background: #010409; border: 1px solid #30363d; color: white; padding: 12px; border-radius: 6px; margin: 10px 0; box-sizing: border-box; }
-        button { padding: 12px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
-        .btn-yes { background: #1f883d; color: white; width: 48%; }
-        .btn-no { background: #cf222e; color: white; width: 48%; }
-        .btn-connect { background: #238636; color: white; }
+        :root { --bg: #0d1117; --card-bg: #161b22; --border: #30363d; --text: #c9d1d9; --accent: #58a6ff; }
+        body { background-color: var(--bg); color: var(--text); font-family: -apple-system, sans-serif; margin: 0; display: flex; }
+
+        /* Sidebar */
+        .sidebar { width: 250px; height: 100vh; background: #010409; border-right: 1px solid var(--border); padding: 20px; }
+        
+        /* Main Content */
+        .main { flex: 1; padding: 30px; overflow-y: auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        
+        /* Cards */
+        .market-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 25px; margin-bottom: 20px; }
+        .btn-yes { background: #238636; border: none; color: white; padding: 10px 20px; border-radius: 6px; cursor: pointer; }
+        .btn-no { background: #da3633; border: none; color: white; padding: 10px 20px; border-radius: 6px; cursor: pointer; }
+        
+        button { cursor: pointer; font-weight: 600; transition: 0.2s; }
+        button:hover { opacity: 0.9; }
     </style>
 </head>
 <body>
 
-<div class="container">
+<div class="sidebar">
+    <h2 style="color: var(--accent);">Futura Markets</h2>
+    <p>Market Explorer</p>
+</div>
+
+<div class="main">
     <div class="header">
-        <h2>Futura Markets</h2>
-        <button class="btn-connect" onclick="connectWallet()" id="connectBtn">Connect Wallet</button>
+        <h1>Active Markets</h1>
+        <button id="connectBtn" onclick="connectWallet()" style="background: var(--accent); color: white; border: none; padding: 10px 20px; border-radius: 6px;">Connect Wallet</button>
     </div>
 
-    <div class="card">
-        <h3>Create New Market</h3>
-        <input type="text" id="question" placeholder="প্রশ্ন লিখুন...">
-        <button style="background:#58a6ff; color:white; width:100%" onclick="createMarket()">Create Market</button>
-    </div>
-
-    <div class="card">
-        <h3>ETH কি আজ বাড়বে?</h3>
-        <p>Market ID: 0</p>
-        <div style="display: flex; justify-content: space-between;">
-            <button class="btn-yes" onclick="bet(0, true)">YES</button>
-            <button class="btn-no" onclick="bet(0, false)">NO</button>
+    <!-- মার্কেট কার্ড -->
+    <div class="market-card">
+        <h3>Will the price of ETH go up today?</h3>
+        <p style="color: #8b949e;">Market ID: 0 | Volume: 0.5 ETH</p>
+        <div style="display: flex; gap: 10px;">
+            <button class="btn-yes" onclick="bet(0, true)">YES @ 0.78</button>
+            <button class="btn-no" onclick="bet(0, false)">NO @ 0.22</button>
         </div>
     </div>
 </div>
@@ -47,29 +55,11 @@
     let signer;
 
     async function connectWallet() {
-        // মেটামাস্ক আছে কি না চেক করা
-        if (typeof window.ethereum === 'undefined') {
-            return alert("MetaMask এক্সটেনশনটি ইনস্টল করুন!");
-        }
-
-        try {
-            // মেটামাস্ক কানেক্ট রিকোয়েস্ট
-            const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-            const provider = new ethers.providers.Web3Provider(window.ethereum);
-            signer = provider.getSigner();
-            
-            document.getElementById("connectBtn").innerText = "Connected: " + accounts[0].substring(0,6) + "...";
-            console.log("Connected to:", accounts[0]);
-        } catch (error) {
-            console.error("Connection failed:", error);
-            alert("কানেক্ট করতে ব্যর্থ! দয়া করে পেজটি রিফ্রেশ করে আবার চেষ্টা করুন।");
-        }
-    }
-
-    async function createMarket() {
-        if (!signer) return alert("ওয়ালেট কানেক্ট করুন!");
-        const contract = new ethers.Contract(contractAddress, abi, signer);
-        await contract.createMarket(document.getElementById('question').value);
+        if (!window.ethereum) return alert("MetaMask ইনস্টল করুন!");
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        await window.ethereum.request({ method: 'eth_requestAccounts' });
+        signer = provider.getSigner();
+        document.getElementById("connectBtn").innerText = "Wallet Connected";
     }
 
     async function bet(id, pred) {
