@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Predict Arc</title>
+    <!-- লাইব্রেরি লোড -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
     <style>
         :root { --bg: #0d1117; --card-bg: #161b22; --accent: #58a6ff; }
@@ -26,7 +27,7 @@
         <button id="connectBtn" onclick="connectWallet()" style="padding:10px 20px; cursor:pointer;">Connect Wallet</button>
     </div>
 
-    <!-- মার্কেট আইডি ০ -->
+    <!-- মার্কেট কার্ডস -->
     <div class="market-card">
         <h3>Will ETH price go up today?</h3>
         <p>Market ID: 0</p>
@@ -34,7 +35,6 @@
         <button class="btn-no" onclick="bet(0, false)">NO</button>
     </div>
 
-    <!-- নতুন ৩টি মার্কেট -->
     <div class="market-card">
         <h3>Will it rain in Dhaka tomorrow?</h3>
         <p>Market ID: 1</p>
@@ -65,8 +65,7 @@
 
     async function connectWallet() {
         if (typeof window.ethereum === 'undefined') {
-            alert("MetaMask is not installed!");
-            return;
+            return alert("MetaMask is not installed!");
         }
         try {
             await window.ethereum.request({ method: 'eth_requestAccounts' });
@@ -80,19 +79,24 @@
 
     async function bet(id, pred) {
         if (!signer) {
-            alert("Please connect your wallet first!");
+            alert("Please connect wallet first!");
             return;
         }
         try {
             const contract = new ethers.Contract(contractAddress, abi, signer);
+            // সরাসরি বাজি ধরার ফাংশন
             const tx = await contract.bet(id, pred, { value: ethers.utils.parseEther("0.001") });
-            alert("Transaction sent!");
+            alert("Transaction sent! Wait for confirmation...");
             await tx.wait();
             alert("Bet Successful!");
         } catch (e) {
+            console.error(e);
             alert("Bet failed: " + e.message);
         }
     }
+</script>
+</body>
+</html>
 </script>
 </body>
 </html>
