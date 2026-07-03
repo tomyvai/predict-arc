@@ -5,71 +5,71 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Predict.arc | Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- ethers v5.7.2 লোড করার জন্য এটি সবচেয়ে নিশ্চিত লিঙ্ক -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
     <style>
         body { background: #0f172a; color: white; }
         .glass { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); }
     </style>
 </head>
-<body class="p-8">
+<body class="p-4 md:p-8">
     <div class="max-w-4xl mx-auto">
-        <header class="flex justify-between items-center mb-8">
-            <h1 class="text-3xl font-bold">Predict.arc</h1>
-            <button id="connectBtn" onclick="connectWallet()" class="bg-indigo-600 px-6 py-2 rounded-full font-semibold">Connect Wallet</button>
+        <!-- Header -->
+        <header class="flex flex-col md:flex-row justify-between items-center mb-10 gap-4">
+            <h1 class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-500">Predict.arc</h1>
+            <button id="connectBtn" onclick="connectWallet()" class="bg-indigo-600 hover:bg-indigo-700 px-8 py-3 rounded-full font-bold transition">Connect Wallet</button>
         </header>
 
-        <div id="questionContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-            <p class="text-slate-400">Loading markets...</p>
+        <!-- Markets Grid -->
+        <h2 class="text-xl font-bold mb-4">Active Markets</h2>
+        <div id="questionContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
+            <p class="text-slate-400">Please connect your wallet to view markets...</p>
         </div>
 
+        <!-- Actions -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div class="glass p-6 rounded-xl">
-                <h2 class="font-bold mb-4">Place Bet</h2>
-                <input id="marketId" type="number" placeholder="Enter Market ID" class="w-full p-2 bg-slate-900 rounded mb-2 border border-slate-700">
-                <div class="flex gap-2">
-                    <button onclick="placeBet(true)" class="bg-emerald-600 px-4 py-2 rounded w-full font-bold">YES</button>
-                    <button onclick="placeBet(false)" class="bg-rose-600 px-4 py-2 rounded w-full font-bold">NO</button>
+            <div class="glass p-6 rounded-2xl">
+                <h2 class="font-bold text-lg mb-4">Place Your Bet</h2>
+                <input id="marketId" type="number" placeholder="Enter Market ID" class="w-full p-3 bg-slate-900 rounded-lg mb-4 border border-slate-700 focus:outline-none focus:border-indigo-500">
+                <div class="flex gap-3">
+                    <button onclick="placeBet(true)" class="bg-emerald-600 hover:bg-emerald-700 py-3 rounded-lg w-full font-bold transition">YES</button>
+                    <button onclick="placeBet(false)" class="bg-rose-600 hover:bg-rose-700 py-3 rounded-lg w-full font-bold transition">NO</button>
                 </div>
             </div>
 
-            <div class="glass p-6 rounded-xl">
-                <h2 class="font-bold mb-4">Create Market</h2>
-                <input id="newQuestion" type="text" placeholder="Enter question" class="w-full p-2 bg-slate-900 rounded mb-2 border border-slate-700">
-                <button onclick="createMarket()" class="w-full bg-blue-600 py-3 rounded-xl font-bold">Create Market</button>
+            <div class="glass p-6 rounded-2xl">
+                <h2 class="font-bold text-lg mb-4">Create New Market</h2>
+                <input id="newQuestion" type="text" placeholder="What is your prediction?" class="w-full p-3 bg-slate-900 rounded-lg mb-4 border border-slate-700 focus:outline-none focus:border-blue-500">
+                <button onclick="createMarket()" class="w-full bg-blue-600 hover:bg-blue-700 py-3 rounded-lg font-bold transition">Create Market</button>
             </div>
         </div>
     </div>
 
     <script>
+        // আপনার জাভাস্ক্রিপ্ট কোড এখানে আগের মতোই থাকবে...
+        // শুধু নিশ্চিত করুন contractAddress এবং abi ঠিক আছে।
         const contractAddress = "0x459b226eE3192603260c9c94d78F5173BA040f2c";
         const abi = [
-            "function bet(uint256 _marketId, bool _prediction) public payable",
-            "function createMarket(string memory _question) public",
-            "function getMarketCount() public view returns (uint256)",
-            "function markets(uint256) public view returns (string question, bool resolved, bool outcome, uint256 totalYes, uint256 totalNo)"
-        ];
-
-        // ethers লোড হয়েছে কি না চেক করা
-        function checkEthers() {
-            if (typeof ethers === 'undefined') {
-                console.error("Ethers.js is not loaded yet!");
-                setTimeout(checkEthers, 500); // ৫০ মিলি সেকেন্ড পরে আবার চেক করবে
-                return false;
-            }
-            return true;
-        }
+    {"inputs":[],"stateMutability":"nonpayable","type":"constructor"},
+    {"inputs":[{"internalType":"uint256","name":"_marketId","type":"uint256"},{"internalType":"bool","name":"_prediction","type":"bool"}],"name":"bet","outputs":[],"stateMutability":"payable","type":"function"},
+    {"inputs":[{"internalType":"uint256","name":"_marketId","type":"uint256"}],"name":"claimWinnings","outputs":[],"stateMutability":"nonpayable","type":"function"},
+    {"inputs":[{"internalType":"string","name":"_question","type":"string"}],"name":"createMarket","outputs":[],"stateMutability":"nonpayable","type":"function"},
+    {"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"markets","outputs":[{"internalType":"string","name":"question","type":"string"},{"internalType":"bool","name":"resolved","type":"bool"},{"internalType":"bool","name":"outcome","type":"bool"},{"internalType":"uint256","name":"totalYes","type":"uint256"},{"internalType":"uint256","name":"totalNo","type":"uint256"}],"stateMutability":"view","type":"function"},
+    {"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},
+    {"inputs":[{"internalType":"uint256","name":"_marketId","type":"uint256"},{"internalType":"bool","name":"_outcome","type":"bool"}],"name":"resolveMarket","outputs":[],"stateMutability":"nonpayable","type":"function"}
+];
 
         async function connectWallet() {
             if (window.ethereum) {
                 await window.ethereum.request({ method: 'eth_requestAccounts' });
                 document.getElementById('connectBtn').innerText = "Connected";
                 loadQuestions();
-            } else { alert("Please install MetaMask!"); }
+            } else {
+                alert("Please install MetaMask!");
+            }
         }
 
         async function loadQuestions() {
-            if (!checkEthers() || !window.ethereum) return;
+            if (!window.ethereum) return;
             try {
                 const provider = new ethers.providers.Web3Provider(window.ethereum);
                 const contract = new ethers.Contract(contractAddress, abi, provider);
@@ -80,14 +80,19 @@
                 for(let i = 0; i < count; i++) {
                     const data = await contract.markets(i);
                     container.innerHTML += `
-                        <div class="glass p-4 rounded-lg">
-                            <p class="text-xs text-indigo-400 font-bold">ID: ${i}</p>
-                            <p class="font-semibold mt-1">${data.question}</p>
+                        <div class="glass p-5 rounded-xl hover:border-indigo-500 transition">
+                            <span class="text-indigo-400 font-mono text-sm">ID: ${i}</span>
+                            <h3 class="text-lg font-semibold mt-1">${data.question}</h3>
+                            <div class="flex gap-4 mt-3 text-sm text-slate-400">
+                                <span>Yes: ${data.totalYes.toString()}</span>
+                                <span>No: ${data.totalNo.toString()}</span>
+                            </div>
                         </div>`;
                 }
-            } catch(e) { console.error("Error loading:", e); }
+            } catch(e) { console.error(e); }
         }
 
+        // বাকি ফাংশনগুলো (placeBet, createMarket) আগের মতোই রাখুন
         async function placeBet(isYes) {
             const id = document.getElementById('marketId').value;
             const provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -103,7 +108,7 @@
 
         async function createMarket() {
             const question = document.getElementById('newQuestion').value;
-            if(!question) return alert("Write a question first!");
+            if(!question) return alert("Enter a question!");
             const provider = new ethers.providers.Web3Provider(window.ethereum);
             const signer = provider.getSigner();
             const contract = new ethers.Contract(contractAddress, abi, signer);
@@ -114,8 +119,6 @@
                 loadQuestions();
             } catch(e) { alert("Error: " + e.message); }
         }
-
-        window.onload = loadQuestions;
     </script>
 </body>
 </html>
