@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Predict.arc | Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"></script>
+    <!-- নতুন এবং আরও নির্ভরযোগ্য CDN লিঙ্ক -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
     <style>
         body { background: #0f172a; color: white; }
         .glass { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); }
@@ -18,9 +19,8 @@
             <button id="connectBtn" onclick="connectWallet()" class="bg-indigo-600 px-6 py-2 rounded-full font-semibold">Connect Wallet</button>
         </header>
 
-        <!-- প্রশ্নগুলো এখানে কলাম আকারে আসবে -->
         <div id="questionContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-            <!-- Questions will be injected here -->
+            <p class="text-slate-400">Loading markets...</p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -52,20 +52,23 @@
 
         async function connectWallet() {
             if (window.ethereum) {
-                await window.ethereum.request({ method: 'eth_requestAccounts' });
-                document.getElementById('connectBtn').innerText = "Connected";
-            }
+                try {
+                    await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    document.getElementById('connectBtn').innerText = "Connected";
+                    loadQuestions();
+                } catch (err) { alert("User denied account access"); }
+            } else { alert("Please install MetaMask!"); }
         }
 
         async function loadQuestions() {
             if (!window.ethereum) return;
-            const provider = new ethers.providers.Web3Provider(window.ethereum);
-            const contract = new ethers.Contract(contractAddress, abi, provider);
-            const container = document.getElementById('questionContainer');
-            
             try {
+                const provider = new ethers.providers.Web3Provider(window.ethereum);
+                const contract = new ethers.Contract(contractAddress, abi, provider);
                 const count = await contract.getMarketCount();
-                container.innerHTML = ""; 
+                const container = document.getElementById('questionContainer');
+                container.innerHTML = "";
+                
                 for(let i = 0; i < count; i++) {
                     const data = await contract.markets(i);
                     container.innerHTML += `
@@ -74,7 +77,7 @@
                             <p class="font-semibold mt-1">${data.question}</p>
                         </div>`;
                 }
-            } catch(e) { console.error("Error:", e); }
+            } catch(e) { console.error("Error loading:", e); }
         }
 
         async function placeBet(isYes) {
@@ -83,15 +86,15 @@
             const signer = provider.getSigner();
             const contract = new ethers.Contract(contractAddress, abi, signer);
             try {
-                const tx = await contract.bet(id, isYes, { value: ethers.utils.parseEther("0.001"), gasLimit: 500000 });
+                const tx = await contract.bet(id, isYes, { value: ethers.utils.parseEther("0.001") });
                 await tx.wait();
                 alert("Bet Successful!");
-                loadQuestions();
-            } catch(e) { alert("Trx Failed: " + (e.reason || e.message)); }
+            } catch(e) { alert("Error: " + e.message); }
         }
 
         async function createMarket() {
             const question = document.getElementById('newQuestion').value;
+            if(!question) return alert("Write a question first!");
             const provider = new ethers.providers.Web3Provider(window.ethereum);
             const signer = provider.getSigner();
             const contract = new ethers.Contract(contractAddress, abi, signer);
@@ -103,7 +106,12 @@
             } catch(e) { alert("Error: " + e.message); }
         }
 
-        window.onload = loadQuestions;
+        window.onload = () => {
+            if (window.ethereum && window.ethereum.selectedAddress) {
+                document.getElementById('connectBtn').innerText = "Connected";
+            }
+            loadQuestions();
+        };
     </script>
 </body>
 </html>
